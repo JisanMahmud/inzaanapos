@@ -16,7 +16,6 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with uniCenta oPOS.  If not, see <http://www.gnu.org/licenses/>.
-
 package com.openbravo.pos.inventory;
 
 import com.openbravo.basic.BasicException;
@@ -43,51 +42,53 @@ import javax.swing.JPanel;
  * @author adrianromero
  */
 public final class CategoriesEditor extends JPanel implements EditorRecord {
-       
+
     private SentenceList m_sentcat;
     private ComboBoxValModel m_CategoryModel;
-    
+
     private SentenceExec m_sentadd;
     private SentenceExec m_sentdel;
-    
+
     private Object m_id;
-    
-    /** Creates new form JPanelCategories
+
+    /**
+     * Creates new form JPanelCategories
+     *
      * @param app
-     * @param dirty */
+     * @param dirty
+     */
     public CategoriesEditor(AppView app, DirtyManager dirty) {
-        
+
         DataLogicSales dlSales = (DataLogicSales) app.getBean("com.openbravo.pos.forms.DataLogicSales");
-             
+
         initComponents();
-             
+
         // El modelo de categorias
         m_sentcat = dlSales.getCategoriesList();
         m_CategoryModel = new ComboBoxValModel();
-        
+
         m_sentadd = dlSales.getCatalogCategoryAdd();
         m_sentdel = dlSales.getCatalogCategoryDel();
-        
+
         m_jName.getDocument().addDocumentListener(dirty);
         m_jCategory.addActionListener(dirty);
         m_jImage.addPropertyChangeListener("image", dirty);
         m_jCatNameShow.addActionListener(dirty);
-        
+
 // Added JDL 13.04.13
-       m_jTextTip.getDocument().addDocumentListener(dirty); 
-       
-     
+        m_jTextTip.getDocument().addDocumentListener(dirty);
+
         writeValueEOF();
     }
-    
+
     /**
      *
      */
     @Override
     public void refresh() {
-        
+
         List a;
-        
+
         try {
             a = m_sentcat.list();
         } catch (BasicException eD) {
@@ -95,12 +96,12 @@ public final class CategoriesEditor extends JPanel implements EditorRecord {
             msg.show(this);
             a = new ArrayList();
         }
-        
+
         a.add(0, null); // The null item
         m_CategoryModel = new ComboBoxValModel(a);
         m_jCategory.setModel(m_CategoryModel);
     }
-    
+
     /**
      *
      */
@@ -115,13 +116,13 @@ public final class CategoriesEditor extends JPanel implements EditorRecord {
         m_jImage.setEnabled(false);
         m_jCatalogDelete.setEnabled(false);
         m_jCatalogAdd.setEnabled(false);
-        m_jTextTip.setText(null);        
+        m_jTextTip.setText(null);
         m_jTextTip.setEnabled(false);
         m_jCatNameShow.setSelected(false);
         m_jCatNameShow.setEnabled(false);
 
     }
-    
+
     /**
      *
      */
@@ -137,7 +138,7 @@ public final class CategoriesEditor extends JPanel implements EditorRecord {
         m_jCatalogDelete.setEnabled(false);
         m_jCatalogAdd.setEnabled(false);
         m_jTextTip.setText(null);
-        m_jTextTip.setEnabled(true);   
+        m_jTextTip.setEnabled(true);
         m_jCatNameShow.setSelected(true);
         m_jCatNameShow.setEnabled(true);
 
@@ -155,15 +156,15 @@ public final class CategoriesEditor extends JPanel implements EditorRecord {
         m_CategoryModel.setSelectedKey(cat[2]);
         m_jImage.setImage((BufferedImage) cat[3]);
         m_jTextTip.setText(Formats.STRING.formatValue(cat[4]));
-        m_jCatNameShow.setSelected(((Boolean)cat[5]).booleanValue());
+        m_jCatNameShow.setSelected(((Boolean) cat[5]).booleanValue());
         m_jName.setEnabled(false);
         m_jCategory.setEnabled(false);
         m_jImage.setEnabled(false);
         m_jCatalogDelete.setEnabled(false);
         m_jCatalogAdd.setEnabled(false);
-        m_jTextTip.setEnabled(false);     
+        m_jTextTip.setEnabled(false);
         m_jCatNameShow.setEnabled(false);
-        
+
     }
 
     /**
@@ -177,26 +178,25 @@ public final class CategoriesEditor extends JPanel implements EditorRecord {
         m_jName.setText(Formats.STRING.formatValue(cat[1]));
         m_CategoryModel.setSelectedKey(cat[2]);
         m_jImage.setImage((BufferedImage) cat[3]);
-        m_jTextTip.setText(Formats.STRING.formatValue(cat[4])); 
-        m_jCatNameShow.setSelected(((Boolean)cat[5]).booleanValue());
+        m_jTextTip.setText(Formats.STRING.formatValue(cat[4]));
+        m_jCatNameShow.setSelected(((Boolean) cat[5]).booleanValue());
         m_jName.setEnabled(true);
         m_jCategory.setEnabled(true);
         m_jImage.setEnabled(true);
         m_jCatalogDelete.setEnabled(true);
         m_jCatalogAdd.setEnabled(true);
-        m_jTextTip.setEnabled(true); 
+        m_jTextTip.setEnabled(true);
         m_jCatNameShow.setEnabled(true);
-    
+
     }
 
     /**
      *
-     * @return
-     * @throws BasicException
+     * @return @throws BasicException
      */
     @Override
     public Object createValue() throws BasicException {
-        
+
         Object[] cat = new Object[7];
 
         cat[0] = m_id;
@@ -205,7 +205,7 @@ public final class CategoriesEditor extends JPanel implements EditorRecord {
         cat[3] = m_jImage.getImage();
         cat[4] = m_jTextTip.getText();
         cat[5] = Boolean.valueOf(m_jCatNameShow.isSelected());
-      
+
         return cat;
     }
 
@@ -217,11 +217,11 @@ public final class CategoriesEditor extends JPanel implements EditorRecord {
     public Component getComponent() {
         return this;
     }
-    
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -338,13 +338,13 @@ public final class CategoriesEditor extends JPanel implements EditorRecord {
             m_sentdel.exec(m_id);
 // JG 3 Oct 2013 - simple toggle Category state         
 // TODO replace with ToggleButton
-            m_jCatalogDelete.setEnabled(false);            
-            m_jCatalogAdd.setEnabled(true);    
+            m_jCatalogDelete.setEnabled(false);
+            m_jCatalogAdd.setEnabled(true);
             jLabel8.setText(AppLocal.getIntString("label.CatalogueStatusNo"));
         } catch (BasicException e) {
             JMessageDialog.showMessage(this, new MessageInf(MessageInf.SGN_WARNING, AppLocal.getIntString("message.cannotexecute"), e));
         }
-        
+
     }//GEN-LAST:event_m_jCatalogDeleteActionPerformed
 
     private void m_jCatalogAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m_jCatalogAddActionPerformed
@@ -358,14 +358,14 @@ public final class CategoriesEditor extends JPanel implements EditorRecord {
             m_jCatalogAdd.setEnabled(false);
             m_jCatalogDelete.setEnabled(true);
             jLabel8.setText(AppLocal.getIntString("label.CatalogueStatusYes"));
-         
+
         } catch (BasicException e) {
             JMessageDialog.showMessage(this, new MessageInf(MessageInf.SGN_WARNING, AppLocal.getIntString("message.cannotexecute"), e));
         }
 
     }//GEN-LAST:event_m_jCatalogAddActionPerformed
-    
-    
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JInternalFrame jInternalFrame1;
     private javax.swing.JLabel jLabel2;
@@ -383,5 +383,5 @@ public final class CategoriesEditor extends JPanel implements EditorRecord {
     private javax.swing.JTextField m_jName;
     private javax.swing.JTextField m_jTextTip;
     // End of variables declaration//GEN-END:variables
-    
+
 }

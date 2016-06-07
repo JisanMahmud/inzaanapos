@@ -19,6 +19,10 @@
 
 package com.openbravo.data.loader;
 
+import com.inzaana.pos.client.ClientUploadManager;
+import com.inzaana.pos.client.SQLMethod;
+import com.inzaana.pos.client.SQLProcessor;
+import com.inzaana.pos.utils.DBTables;
 import com.openbravo.basic.BasicException;
 import java.sql.*;
 import java.util.logging.Level;
@@ -185,12 +189,29 @@ public class PreparedSentence extends JDBCSentence {
             }
 
             if (m_Stmt.execute()) {
-                return new JDBCDataResultSet(m_Stmt.getResultSet(), m_SerRead);
+                DataResultSet dataResultSet = new JDBCDataResultSet(m_Stmt.getResultSet(), m_SerRead);
+                /////// Coding for Inzaana /////////////
+                    SQLProcessor sqlProcessor = new SQLProcessor(m_sentence);
+                    if (sqlProcessor.shouldSendToServer()) {
+                        ClientUploadManager clientUploadManager = new ClientUploadManager(sqlProcessor.getTable(), sqlProcessor.getSQLMethod(), m_sentence, params);
+                        clientUploadManager.run();
+                    }
+                    
+                return dataResultSet;
             } else { 
                 int iUC = m_Stmt.getUpdateCount();
                 if (iUC < 0) {
                     return null;
                 } else {
+                    /////// Coding for Inzaana /////////////
+                    SQLProcessor sqlProcessor = new SQLProcessor(m_sentence);
+                    if (sqlProcessor.shouldSendToServer()) {
+                        ClientUploadManager clientUploadManager = new ClientUploadManager(sqlProcessor.getTable(), sqlProcessor.getSQLMethod(), m_sentence, params);
+                        clientUploadManager.run();
+                    }
+
+                    ////////////////////////////////////////
+                    
                     return new SentenceUpdateResultSet(iUC);
                 }
             }

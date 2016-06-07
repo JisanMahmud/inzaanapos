@@ -121,12 +121,23 @@ public class StartPOS {
                 TicketInfo.setHostname(hostname);
                 
                 String screenmode = config.getProperty("machine.screenmode");
-                if ("fullscreen".equals(screenmode)) {
-                    JRootKiosk rootkiosk = new JRootKiosk();
-                    rootkiosk.initFrame(config);
-                } else {
-                    JRootFrame rootframe = new JRootFrame(); 
-                    rootframe.initFrame(config);
+                
+                // For Inzaana Splash Screen
+                InzaanaSplash inzaanaSplash = new InzaanaSplash();
+                inzaanaSplash.initFrame(config);
+                if (!inzaanaSplash.isRegistered()) {
+                    inzaanaSplash.setLocationRelativeTo(null);
+                    inzaanaSplash.setVisible(true);
+                }
+
+                if (inzaanaSplash.isRegistered()) {
+                    if ("fullscreen".equals(screenmode)) {
+                        JRootKiosk rootkiosk = new JRootKiosk();
+                        rootkiosk.initFrame(config);
+                    } else {
+                        JRootFrame rootframe = new JRootFrame();
+                        rootframe.initFrame(config);
+                    }
                 }
             }
         });    
