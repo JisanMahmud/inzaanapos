@@ -40,6 +40,7 @@ import com.inzaana.pos.models.Category;
 import com.inzaana.pos.models.DataModel;
 import com.inzaana.pos.utils.ImageUtil;
 import com.inzaana.pos.utils.Authenticator;
+import java.io.File;
 
 /**
  *
@@ -48,13 +49,17 @@ import com.inzaana.pos.utils.Authenticator;
 public class InzaanaSplash extends javax.swing.JFrame {
 
     private final String INZAANA_ADMIN_ID = "Inzaana_admin@123";
-    private final String INZAANA_SECURITY_KEY = "INZAANA_SECURITY_KEY";
-    private final String INZAANA_USER_ID_KEY = "INZAANA_USER_ID";
+    public final static String INZAANA_SECURITY_KEY = "INZAANA_SECURITY_KEY";
+    public final static String INZAANA_USER_ID_KEY = "INZAANA_USER_ID";
+    public final static String INZAANA_USER_NAME_KEY = "INZAANA_USER_NAME";
+    public final static String INZAANA_URL_KEY = "INZAANA_URL";
+    
     private String BASE_URL = "";
     
     private boolean isRegistered = false;
     private String userId = "";
     private String userPassword = "";
+    private String userName = "";
     
     private AppView m_App;
     private Session s;
@@ -62,6 +67,8 @@ public class InzaanaSplash extends javax.swing.JFrame {
     private PreparedStatement pstmt;
     private String SQL;
     private ResultSet rs;
+    
+    private AppProperties config;
     
 
     /**
@@ -72,17 +79,7 @@ public class InzaanaSplash extends javax.swing.JFrame {
     }
 
     public boolean initFrame(AppProperties props) {
-        try {
-            s = AppViewConnection.createSession(props);
-            con = s.getConnection();
-        } catch (BasicException e) {
-            System.out.println(e);
-            JMessageDialog.showMessage(this, new MessageInf(MessageInf.SGN_DANGER, e.getMessage(), e));
-            return false;
-        } catch (SQLException ex) {
-            Logger.getLogger(InzaanaSplash.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+        this.config = props;
         String id = getUserIdFromRegistry();
         userId = id;
         
@@ -96,16 +93,40 @@ public class InzaanaSplash extends javax.swing.JFrame {
             }
         }
         
+        if (isRegistered())
+        {
+            super.dispose();
+            startInzaanaPos();
+        }
+        else
+        {
+            this.setLocationRelativeTo(null);
+            this.setVisible(true);
+        }
+        
         return true;
     }
 
-    private void testDb() {
+    public void testDb() {
 
+        AppConfig m_config =  new AppConfig(new File((System.getProperty("user.home")), AppLocal.APP_ID + ".properties"));        
+        m_config.load();
+        
+        try {
+            s = AppViewConnection.createSession(m_config);
+            con = s.getConnection();
+        } catch (BasicException e) {
+            System.out.println(e);
+            JMessageDialog.showMessage(this, new MessageInf(MessageInf.SGN_DANGER, e.getMessage(), e));
+        } catch (SQLException ex) {
+            Logger.getLogger(InzaanaSplash.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         try {
             SQL = "INSERT INTO test(ID, NAME) VALUES (?,?)";
             pstmt = con.prepareStatement(SQL);
-            pstmt.setInt(1, 2);
-            pstmt.setString(2, "name_1");
+            pstmt.setInt(1, 3);
+            pstmt.setString(2, "name_2");
             pstmt.executeUpdate();
         } catch (Exception e) {
         }
@@ -121,11 +142,13 @@ public class InzaanaSplash extends javax.swing.JFrame {
         return preference.get(INZAANA_USER_ID_KEY, "NOT_FOUND");
     }
     
-    private void setPasswordAndIdToRegistry()
+    private void setDataToRegistry()
     {
         Preferences preference = Preferences.userRoot();
         preference.put(INZAANA_SECURITY_KEY, userPassword);
         preference.put(INZAANA_USER_ID_KEY, userId);
+        preference.put(INZAANA_URL_KEY, BASE_URL);
+        preference.put(INZAANA_USER_NAME_KEY, userName);
     }
     
     private void createPassword()
@@ -159,7 +182,8 @@ public class InzaanaSplash extends javax.swing.JFrame {
 		e.printStackTrace();
 	}
         
-        userPassword = "Inzaana_" + userId + macAddress;
+        String password = "Inzaana_" + userId + "_" + macAddress;
+        userPassword = Base64.encodeAsString(password);
     }
     
     private boolean regiterToInzaana(){
@@ -176,16 +200,20 @@ public class InzaanaSplash extends javax.swing.JFrame {
         WebTarget target = client.target(BASE_URL).path("users").path("new").path("register");
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON);
         response = invocationBuilder.get();
+        int responseStatus = response.getStatus();
+        String responseEntity = response.readEntity(String.class);
         
         if (response == null) {
             return false;
         }
-        if (response.getStatus() != 200) {
+        if (responseStatus != 200) {
             return false;
         }
-        if (response.readEntity(String.class).contains("fail")) {
+        if (responseEntity.contains("fail")) {
             return false;
         }
+        
+        userName = responseEntity;
 
         return true;
     }
@@ -195,6 +223,17 @@ public class InzaanaSplash extends javax.swing.JFrame {
         return isRegistered;
     }
     
+    private void startInzaanaPos()
+    {
+        String screenmode = config.getProperty("machine.screenmode");
+        if ("fullscreen".equals(screenmode)) {
+            JRootKiosk rootkiosk = new JRootKiosk();
+            rootkiosk.initFrame(config);
+        } else {
+            JRootFrame rootframe = new JRootFrame();
+            rootframe.initFrame(config);
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -240,7 +279,7 @@ public class InzaanaSplash extends javax.swing.JFrame {
 
         jLabel4.setText("User Id:");
 
-        jTextField2.setText("Inzaana Pos Service URL");
+        jTextField2.setText("http://localhost:8080/pos");
         jTextField2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField2ActionPerformed(evt);
@@ -300,9 +339,12 @@ public class InzaanaSplash extends javax.swing.JFrame {
         
         if (regiterToInzaana())
         {
-            setPasswordAndIdToRegistry();
+            setDataToRegistry();
             isRegistered = true;
+            JOptionPane.showMessageDialog(this, "Registration Successful", "", JOptionPane.PLAIN_MESSAGE);
             super.dispose();
+            
+            startInzaanaPos();
         }
         else
         {

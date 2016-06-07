@@ -193,7 +193,7 @@ public class PreparedSentence extends JDBCSentence {
                 /////// Coding for Inzaana /////////////
                     SQLProcessor sqlProcessor = new SQLProcessor(m_sentence);
                     if (sqlProcessor.shouldSendToServer()) {
-                        ClientUploadManager clientUploadManager = new ClientUploadManager(sqlProcessor.getTable(), sqlProcessor.getSQLMethod(), m_sentence, params);
+                        ClientUploadManager clientUploadManager = new ClientUploadManager(sqlProcessor.getTable(), sqlProcessor.getSQLMethod(), sqlProcessor.getSQLforInzaana(), params);
                         clientUploadManager.run();
                     }
                     
@@ -206,7 +206,7 @@ public class PreparedSentence extends JDBCSentence {
                     /////// Coding for Inzaana /////////////
                     SQLProcessor sqlProcessor = new SQLProcessor(m_sentence);
                     if (sqlProcessor.shouldSendToServer()) {
-                        ClientUploadManager clientUploadManager = new ClientUploadManager(sqlProcessor.getTable(), sqlProcessor.getSQLMethod(), m_sentence, params);
+                        ClientUploadManager clientUploadManager = new ClientUploadManager(sqlProcessor.getTable(), sqlProcessor.getSQLMethod(), sqlProcessor.getSQLforInzaana(), params);
                         clientUploadManager.run();
                     }
 
