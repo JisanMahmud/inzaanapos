@@ -18,6 +18,7 @@ import com.inzaana.pos.models.Category;
 import com.inzaana.pos.models.DataModel;
 import com.inzaana.pos.utils.ImageUtil;
 import com.inzaana.pos.utils.Authenticator;
+import com.inzaana.pos.utils.InzaanaDBTables;
 import com.openbravo.basic.BasicException;
 import com.openbravo.data.gui.JMessageDialog;
 import com.openbravo.data.gui.MessageInf;
@@ -31,9 +32,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import org.springframework.util.StringUtils;
 
 public class ClientUploadManager extends Thread {
 
@@ -45,24 +48,27 @@ public class ClientUploadManager extends Thread {
     private Object[] data = null;
     private boolean isBatchUpload = false;
     private DataModel dataModel = null;
-    
+
+    AppConfig m_config;
     private Session s;
     private Connection con;
     private PreparedStatement pstmt;
     private String SQL;
-    private ResultSet rs;
+
+    private int batchUploadSuccessCount;
+    private int batchUploadFailureCount;
 
     public ClientUploadManager(DBTables dbTable, SQLMethod sqlMethod, String sqlForInzaana, Object data) {
         this.dbTable = dbTable;
         this.sqlMethod = sqlMethod;
         this.sqlForInzaana = sqlForInzaana;
         this.data = (Object[]) data;
-        
-        prepareSession();
+
+        prepareAppConfig();
     }
 
     public ClientUploadManager() {
-        isBatchUpload = true;
+        prepareAppConfig();
     }
 
     public void run() {
@@ -73,14 +79,23 @@ public class ClientUploadManager extends Thread {
     public void startUploadProcess() {
         if (prepareTables()) {
             if (!uploadData()) {
-                saveDataToDatabase();
+                if (!isBatchUpload) {
+                    saveDataToDatabase();
+                } else {
+                    increaseBatchUploadFailureCount();
+                }
+            } else if (isBatchUpload) {
+                deleteDataFromDatabase();
             }
         }
     }
 
     private boolean prepareTables() {
         boolean success = false;
-
+        if (isBatchUpload)
+        {
+            return true; // because we have already prepared the table.
+        }
         switch (dbTable) {
             case CATEGORIES: {
                 success = prepareCategoriesTable();
@@ -137,6 +152,60 @@ public class ClientUploadManager extends Thread {
         return success;
     }
 
+    private boolean prepareDataModel(ResultSet resultSet) {
+        boolean success = false;
+
+        switch (dbTable) {
+            case CATEGORIES: {
+                success = prepareCategoriesDataModel(resultSet);
+            }
+            break;
+
+            case PRODUCTS: {
+                success = false;
+            }
+            break;
+
+            case PAYMENTS: {
+                success = false;
+            }
+            break;
+
+            case STOCKDIARY: {
+                success = false;
+            }
+            break;
+
+            default: {
+                success = false;
+            }
+            break;
+        }
+
+        return success;
+    }
+
+    private boolean prepareCategoriesDataModel(ResultSet resultSet) {
+        try {
+            String id = resultSet.getString("ID");
+            String name = resultSet.getString("NAME");
+            String parentId = resultSet.getString("PARENTID");
+            String imageString = resultSet.getString("IMAGE");
+            String textTip = resultSet.getString("TEXTTIP");
+            boolean catShowName = resultSet.getBoolean("CATSHOWNAME");
+            sqlMethod = getSqlMethod(resultSet.getString("SQLMETHOD"));
+
+            dataModel = new Category(id, name, parentId, imageString, textTip, catShowName);
+            DATA_MODEL_ID = id;
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+
+        return true;
+    }
+
     private boolean uploadData() {
 
         if (dataModel == null) {
@@ -150,7 +219,7 @@ public class ClientUploadManager extends Thread {
         String userName = preference.get(InzaanaSplash.INZAANA_USER_NAME_KEY, "NOT_FOUND");
         String userPassword = preference.get(InzaanaSplash.INZAANA_SECURITY_KEY, "NOT_FOUND");
         String baseUrl = preference.get(InzaanaSplash.INZAANA_URL_KEY, "NOT_FOUND");
-        
+
         Client client = ClientBuilder.newClient(config);
         client.register(new LoggingFilter());
         client.register(new Authenticator(userId, userPassword));
@@ -160,21 +229,33 @@ public class ClientUploadManager extends Thread {
             case INSERT: {
                 WebTarget target = client.target(baseUrl).path(dbTable.ToString().toLowerCase()).path(userName);
                 Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON);
-                response = invocationBuilder.put(Entity.entity(dataModel, MediaType.APPLICATION_JSON));
+                try {
+                    response = invocationBuilder.put(Entity.entity(dataModel, MediaType.APPLICATION_JSON));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             break;
 
             case UPDATE: {
                 WebTarget target = client.target(baseUrl).path(dbTable.ToString().toLowerCase()).path(userName);
                 Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON);
-                response = invocationBuilder.post(Entity.entity(dataModel, MediaType.APPLICATION_JSON));
+                try {
+                    response = invocationBuilder.post(Entity.entity(dataModel, MediaType.APPLICATION_JSON));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             break;
 
             case DELETE: {
                 WebTarget target = client.target(baseUrl).path(dbTable.ToString().toLowerCase()).path(userName).path(DATA_MODEL_ID);
                 Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON);
-                response = invocationBuilder.delete();
+                try {
+                    response = invocationBuilder.delete();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             break;
 
@@ -195,40 +276,202 @@ public class ClientUploadManager extends Thread {
 
         return true;
     }
-    
-    private void prepareSession()
-    {
-        AppConfig m_config =  new AppConfig(new File((System.getProperty("user.home")), AppLocal.APP_ID + ".properties"));        
+
+    private void prepareAppConfig() {
+        m_config = new AppConfig(new File((System.getProperty("user.home")), AppLocal.APP_ID + ".properties"));
         m_config.load();
-        
-        try {
-            s = AppViewConnection.createSession(m_config);
-            con = s.getConnection();
-        } catch (BasicException e) {
-            System.out.println(e);
-            JMessageDialog.showMessage(null, new MessageInf(MessageInf.SGN_DANGER, e.getMessage(), e));
-        } catch (SQLException ex) {
-            Logger.getLogger(InzaanaSplash.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     private void saveDataToDatabase() {
-        
-        if (con == null) {
-            return;
-        }
+        int occurance = StringUtils.countOccurrencesOf(sqlForInzaana, "?");
+        Session session_1 = null;
+        Connection dbConnection_1 = null;
+        PreparedStatement pStatement_1 = null;
+
         try {
-            pstmt = con.prepareStatement(sqlForInzaana);
-            for (int i=0; i < data.length; i++)
-            {
-                pstmt.setObject(i+1, data[i]);
+            session_1 = AppViewConnection.createSession(m_config);
+            dbConnection_1 = session_1.getConnection();
+            pStatement_1 = dbConnection_1.prepareStatement(sqlForInzaana);
+
+            for (int i = 0; i < occurance; i++) {
+
+                if ((sqlMethod == sqlMethod.UPDATE || sqlMethod == sqlMethod.DELETE) && i == (occurance - 1)) {
+                    pStatement_1.setObject(i + 1, DATA_MODEL_ID);
+                } else {
+                    pStatement_1.setObject(i + 1, data[i]);
+                }
             }
-            pstmt.executeUpdate();
+            pStatement_1.executeUpdate();
+
         } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (pStatement_1 != null) {
+                    pStatement_1.close();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                if (dbConnection_1 != null) {
+                    dbConnection_1.close();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (session_1 != null) {
+                session_1.close();
+            }
+        }
+
+        String sqlUpdate = "UPDATE " + dbTable.ToString() + "_INZAANA SET sqlmethod=? WHERE ID=?";
+        Session session_2 = null;
+        Connection dbConnection_2 = null;
+        PreparedStatement pStatement_2 = null;
+
+        try {
+            session_2 = AppViewConnection.createSession(m_config);
+            dbConnection_2 = session_2.getConnection();
+            pStatement_2 = dbConnection_2.prepareStatement(sqlUpdate);
+            pStatement_2.setObject(1, sqlMethod.ToString());
+            pStatement_2.setObject(2, DATA_MODEL_ID);
+            pStatement_2.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (pStatement_2 != null) {
+                    pStatement_2.close();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                if (dbConnection_2 != null) {
+                    dbConnection_2.close();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (session_2 != null) {
+                session_2.close();
+            }
         }
     }
 
-    private void startBatchUpload() {
+    private boolean deleteDataFromDatabase() {
+        String sql = "DELETE FROM " + dbTable.ToString() + "_INZAANA" + " WHERE ID=?;";
+        Session session = null;
+        Connection dbConnection = null;
+        PreparedStatement pStatement = null;
+        try {
+            session = AppViewConnection.createSession(m_config);
+            dbConnection = session.getConnection();
+            pStatement = dbConnection.prepareStatement(sql);
+            pStatement.setObject(1, DATA_MODEL_ID);
+            pStatement.executeUpdate();
+            pStatement.close();
+            dbConnection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            increaseBatchUploadFailureCount();
+            return false;
+        } finally {
+            try {
+                if (pStatement != null) {
+                    pStatement.close();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
+            try {
+                if (dbConnection != null) {
+                    dbConnection.close();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            if (session != null) {
+                session.close();
+            }
+        }
+
+        increaseBatchUploadSuccessCount();
+
+        return false;
+    }
+
+    private void increaseBatchUploadSuccessCount() {
+        batchUploadSuccessCount++;
+    }
+
+    private void increaseBatchUploadFailureCount() {
+        batchUploadFailureCount++;
+    }
+
+    public void startBatchUpload() {
+        isBatchUpload = true;
+        batchUploadSuccessCount = 0;
+        batchUploadFailureCount = 0;
+
+        for (DBTables table : DBTables.values()) {
+            this.dbTable = table;
+
+            String sql = "SELECT * FROM " + dbTable.ToString() + "_INZAANA;";
+            Session session = null;
+            Connection dbConnection = null;
+            PreparedStatement pStatement = null;
+            ResultSet resultSet = null;
+
+            try {
+                session = AppViewConnection.createSession(m_config);
+                dbConnection = session.getConnection();
+                pStatement = dbConnection.prepareStatement(sql);
+
+                pStatement = dbConnection.prepareStatement(sql);
+                resultSet = pStatement.executeQuery();
+
+                while (resultSet.next()) {
+                    if (prepareDataModel(resultSet)) {
+                        startUploadProcess();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    resultSet.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                try {
+                    pStatement.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                try {
+                    dbConnection.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                session.close();
+            }
+        }
+
+    }
+
+    private SQLMethod getSqlMethod(String method) {
+        for (SQLMethod sqlMethod : SQLMethod.values()) {
+            if (method.equalsIgnoreCase(sqlMethod.ToString())) {
+                return sqlMethod;
+            }
+        }
+
+        return sqlMethod.NONE;
     }
 }

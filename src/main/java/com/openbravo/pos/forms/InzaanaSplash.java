@@ -40,7 +40,9 @@ import com.inzaana.pos.models.Category;
 import com.inzaana.pos.models.DataModel;
 import com.inzaana.pos.utils.ImageUtil;
 import com.inzaana.pos.utils.Authenticator;
+import com.inzaana.pos.utils.InzaanaDBTables;
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  *
@@ -53,23 +55,22 @@ public class InzaanaSplash extends javax.swing.JFrame {
     public final static String INZAANA_USER_ID_KEY = "INZAANA_USER_ID";
     public final static String INZAANA_USER_NAME_KEY = "INZAANA_USER_NAME";
     public final static String INZAANA_URL_KEY = "INZAANA_URL";
-    
+
     private String BASE_URL = "";
-    
+
     private boolean isRegistered = false;
     private String userId = "";
     private String userPassword = "";
     private String userName = "";
-    
+
     private AppView m_App;
     private Session s;
     private Connection con;
     private PreparedStatement pstmt;
     private String SQL;
     private ResultSet rs;
-    
+
     private AppProperties config;
-    
 
     /**
      * Creates new form InzaanaSplash
@@ -80,129 +81,127 @@ public class InzaanaSplash extends javax.swing.JFrame {
 
     public boolean initFrame(AppProperties props) {
         this.config = props;
+//        initializeInzaanaDBTables();
+        
         String id = getUserIdFromRegistry();
         userId = id;
-        
-        if (!id.equals("NOT_FOUND"))
-        {
+
+        if (!id.equals("NOT_FOUND")) {
             String password = getPasswordFromRegistry();
             createPassword();
-            
+
             if (!password.equals("NOT_FOUND") && password.equals(userPassword)) {
                 isRegistered = true;
             }
         }
-        
-        if (isRegistered())
-        {
+
+        if (isRegistered()) {
             super.dispose();
             startInzaanaPos();
-        }
-        else
-        {
+        } else {
             this.setLocationRelativeTo(null);
             this.setVisible(true);
         }
-        
+
         return true;
     }
 
-    public void testDb() {
+    public void initializeInzaanaDBTables() {
 
-        AppConfig m_config =  new AppConfig(new File((System.getProperty("user.home")), AppLocal.APP_ID + ".properties"));        
-        m_config.load();
-        
-        try {
-            s = AppViewConnection.createSession(m_config);
-            con = s.getConnection();
-        } catch (BasicException e) {
-            System.out.println(e);
-            JMessageDialog.showMessage(this, new MessageInf(MessageInf.SGN_DANGER, e.getMessage(), e));
-        } catch (SQLException ex) {
-            Logger.getLogger(InzaanaSplash.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        try {
-            SQL = "INSERT INTO test(ID, NAME) VALUES (?,?)";
-            pstmt = con.prepareStatement(SQL);
-            pstmt.setInt(1, 3);
-            pstmt.setString(2, "name_2");
-            pstmt.executeUpdate();
-        } catch (Exception e) {
-        }
+//        AppConfig m_config = new AppConfig(new File((System.getProperty("user.home")), AppLocal.APP_ID + ".properties"));
+//        m_config.load();
+//
+//        try {
+//            s = AppViewConnection.createSession(m_config);
+//            con = s.getConnection();
+//        } catch (BasicException e) {
+//            System.out.println(e);
+//            JMessageDialog.showMessage(this, new MessageInf(MessageInf.SGN_DANGER, e.getMessage(), e));
+//        } catch (SQLException ex) {
+//            Logger.getLogger(InzaanaSplash.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//        InzaanaDBTables dbTableCreator = new InzaanaDBTables();
+//
+//        System.out.println("Initializing DB Tables ...");
+//        ArrayList<String> sqlList = new ArrayList<String>();
+//        sqlList.add(dbTableCreator.getSQLForCategoriesTable());
+//        sqlList.add(dbTableCreator.getSQLForProductsTable());
+//
+//        for (String sql : sqlList) {
+//            try {
+//                System.out.println("INZAANA SQL: " + sql);
+//                pstmt = con.prepareStatement(sql);
+//                pstmt.executeUpdate();
+//            } catch (Exception e) {
+//            }
+//        }
     }
-    
-    private String getPasswordFromRegistry(){
+
+    private String getPasswordFromRegistry() {
         Preferences preference = Preferences.userRoot();
         return preference.get(INZAANA_SECURITY_KEY, "NOT_FOUND");
     }
-    
-    private String getUserIdFromRegistry(){
+
+    private String getUserIdFromRegistry() {
         Preferences preference = Preferences.userRoot();
         return preference.get(INZAANA_USER_ID_KEY, "NOT_FOUND");
     }
-    
-    private void setDataToRegistry()
-    {
+
+    private void setDataToRegistry() {
         Preferences preference = Preferences.userRoot();
         preference.put(INZAANA_SECURITY_KEY, userPassword);
         preference.put(INZAANA_USER_ID_KEY, userId);
         preference.put(INZAANA_URL_KEY, BASE_URL);
         preference.put(INZAANA_USER_NAME_KEY, userName);
     }
-    
-    private void createPassword()
-    {
+
+    private void createPassword() {
         String macAddress = null;
         InetAddress ip;
-	try
-	{
-		ip = InetAddress.getLocalHost();
-		NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-		
-		byte[] mac = network.getHardwareAddress();
-		
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < mac.length; i++) {
-			sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));		
-		}
-                
-                macAddress = sb.toString();
-		System.out.println("Mac: " + mac);
-		
-	}
-	catch (UnknownHostException e)
-	{
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	catch (SocketException e)
-	{
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-        
+        try {
+            ip = InetAddress.getLocalHost();
+            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+
+            byte[] mac = network.getHardwareAddress();
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < mac.length; i++) {
+                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+            }
+
+            macAddress = sb.toString();
+            System.out.println("Mac: " + mac);
+
+        } catch (UnknownHostException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SocketException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         String password = "Inzaana_" + userId + "_" + macAddress;
         userPassword = Base64.encodeAsString(password);
     }
-    
-    private boolean regiterToInzaana(){
-        
+
+    private boolean regiterToInzaana() {
+
         createPassword();
-        
+
         ClientConfig config = new ClientConfig();
 
         Client client = ClientBuilder.newClient(config);
         client.register(new LoggingFilter());
         client.register(new Authenticator(userId, userPassword));
         Response response = null;
-        
+
         WebTarget target = client.target(BASE_URL).path("users").path("new").path("register");
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON);
         response = invocationBuilder.get();
         int responseStatus = response.getStatus();
         String responseEntity = response.readEntity(String.class);
-        
+
         if (response == null) {
             return false;
         }
@@ -212,19 +211,17 @@ public class InzaanaSplash extends javax.swing.JFrame {
         if (responseEntity.contains("fail")) {
             return false;
         }
-        
+
         userName = responseEntity;
 
         return true;
     }
-    
-    public boolean isRegistered()
-    {
+
+    public boolean isRegistered() {
         return isRegistered;
     }
-    
-    private void startInzaanaPos()
-    {
+
+    private void startInzaanaPos() {
         String screenmode = config.getProperty("machine.screenmode");
         if ("fullscreen".equals(screenmode)) {
             JRootKiosk rootkiosk = new JRootKiosk();
@@ -333,21 +330,18 @@ public class InzaanaSplash extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
-        
+
         BASE_URL = jTextField2.getText();
         userId = jTextField5.getText();
-        
-        if (regiterToInzaana())
-        {
+
+        if (regiterToInzaana()) {
             setDataToRegistry();
             isRegistered = true;
             JOptionPane.showMessageDialog(this, "Registration Successful", "", JOptionPane.PLAIN_MESSAGE);
             super.dispose();
-            
+
             startInzaanaPos();
-        }
-        else
-        {
+        } else {
             JOptionPane.showMessageDialog(this, "Registration Failed..." + userId + " " + userPassword, "Error", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_jToggleButton1ActionPerformed

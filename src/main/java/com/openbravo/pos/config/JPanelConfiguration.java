@@ -94,6 +94,9 @@ public class JPanelConfiguration extends JPanel implements JPanelView {
         m_panelconfig.add(panel);
         jPanelTicketSetup.add(panel.getConfigComponent());
         
+        panel = new JPanelConfigInzaana();
+        m_panelconfig.add(panel);
+        jPanelInzaana.add(panel.getConfigComponent());
         
         //m_panelconfig.add(new JPanelConfigGeneral());
         //m_panelconfig.add(new JPanelConfigLocale());
@@ -211,6 +214,7 @@ public class JPanelConfiguration extends JPanel implements JPanelView {
         jPanelPeripheral = new javax.swing.JPanel();
         jPanelSystem = new javax.swing.JPanel();
         jPanelTicketSetup = new javax.swing.JPanel();
+        jPanelInzaana = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jbtnRestore = new javax.swing.JButton();
         jbtnExit = new javax.swing.JButton();
@@ -257,6 +261,11 @@ public class JPanelConfiguration extends JPanel implements JPanelView {
         jPanelTicketSetup.setPreferredSize(new java.awt.Dimension(0, 400));
         jPanelTicketSetup.setLayout(new javax.swing.BoxLayout(jPanelTicketSetup, javax.swing.BoxLayout.LINE_AXIS));
         jTabbedPane1.addTab("Ticket Setup", jPanelTicketSetup);
+
+        jPanelInzaana.setMinimumSize(new java.awt.Dimension(107, 248));
+        jPanelInzaana.setPreferredSize(new java.awt.Dimension(730, 450));
+        jPanelInzaana.setLayout(new javax.swing.BoxLayout(jPanelInzaana, javax.swing.BoxLayout.LINE_AXIS));
+        jTabbedPane1.addTab("Inzaana", jPanelInzaana);
 
         jbtnRestore.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         jbtnRestore.setText(AppLocal.getIntString("Button.Factory")); // NOI18N
@@ -356,6 +365,7 @@ public class JPanelConfiguration extends JPanel implements JPanelView {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanelDatabase;
     private javax.swing.JPanel jPanelGeneral;
+    private javax.swing.JPanel jPanelInzaana;
     private javax.swing.JPanel jPanelLocale;
     private javax.swing.JPanel jPanelPayment;
     private javax.swing.JPanel jPanelPeripheral;

@@ -194,7 +194,7 @@ public class PreparedSentence extends JDBCSentence {
                     SQLProcessor sqlProcessor = new SQLProcessor(m_sentence);
                     if (sqlProcessor.shouldSendToServer()) {
                         ClientUploadManager clientUploadManager = new ClientUploadManager(sqlProcessor.getTable(), sqlProcessor.getSQLMethod(), sqlProcessor.getSQLforInzaana(), params);
-                        clientUploadManager.run();
+                        clientUploadManager.start();
                     }
                     
                 return dataResultSet;
@@ -207,7 +207,7 @@ public class PreparedSentence extends JDBCSentence {
                     SQLProcessor sqlProcessor = new SQLProcessor(m_sentence);
                     if (sqlProcessor.shouldSendToServer()) {
                         ClientUploadManager clientUploadManager = new ClientUploadManager(sqlProcessor.getTable(), sqlProcessor.getSQLMethod(), sqlProcessor.getSQLforInzaana(), params);
-                        clientUploadManager.run();
+                        clientUploadManager.start();
                     }
 
                     ////////////////////////////////////////
