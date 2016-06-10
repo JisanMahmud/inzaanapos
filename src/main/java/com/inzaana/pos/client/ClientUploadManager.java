@@ -12,16 +12,13 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.filter.LoggingFilter;
-import org.glassfish.jersey.internal.util.Base64;
 
 import com.inzaana.pos.models.Category;
 import com.inzaana.pos.models.DataModel;
-import com.inzaana.pos.utils.ImageUtil;
+import com.inzaana.pos.models.Payment;
+import com.inzaana.pos.models.Product;
+import com.inzaana.pos.models.StockDiary;
 import com.inzaana.pos.utils.Authenticator;
-import com.inzaana.pos.utils.InzaanaDBTables;
-import com.openbravo.basic.BasicException;
-import com.openbravo.data.gui.JMessageDialog;
-import com.openbravo.data.gui.MessageInf;
 import com.openbravo.data.loader.Session;
 import com.openbravo.pos.forms.AppConfig;
 import com.openbravo.pos.forms.AppLocal;
@@ -32,7 +29,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -50,10 +48,6 @@ public class ClientUploadManager extends Thread {
     private DataModel dataModel = null;
 
     AppConfig m_config;
-    private Session s;
-    private Connection con;
-    private PreparedStatement pstmt;
-    private String SQL;
 
     private int batchUploadSuccessCount;
     private int batchUploadFailureCount;
@@ -92,8 +86,7 @@ public class ClientUploadManager extends Thread {
 
     private boolean prepareTables() {
         boolean success = false;
-        if (isBatchUpload)
-        {
+        if (isBatchUpload) {
             return true; // because we have already prepared the table.
         }
         switch (dbTable) {
@@ -103,17 +96,17 @@ public class ClientUploadManager extends Thread {
             break;
 
             case PRODUCTS: {
-                success = false;
+                success = prepareProductsTable();
             }
             break;
 
             case PAYMENTS: {
-                success = false;
+                success = preparePaymentsTable();
             }
             break;
 
             case STOCKDIARY: {
-                success = false;
+                success = prepareStockDiaryTable();
             }
             break;
 
@@ -121,32 +114,6 @@ public class ClientUploadManager extends Thread {
                 success = false;
             }
             break;
-        }
-
-        return success;
-    }
-
-    private boolean prepareCategoriesTable() {
-        boolean success = true;
-
-        if (data.length < 6) {
-            return false;
-        }
-
-        try {
-            String id = (String) data[0];
-            String name = (String) data[1];
-            String parentId = (String) data[2];
-            BufferedImage image = (BufferedImage) data[3];
-            String textTip = (String) data[4];
-            boolean catShowName = (Boolean) data[5];
-
-            //String imageString = Base64.encodeAsString(ImageUtil.writeImage(image));
-            String imageString = "Test_Image";
-            dataModel = new Category(id, name, parentId, imageString, textTip, catShowName);
-            DATA_MODEL_ID = id;
-        } catch (Exception e) {
-            success = false;
         }
 
         return success;
@@ -162,17 +129,17 @@ public class ClientUploadManager extends Thread {
             break;
 
             case PRODUCTS: {
-                success = false;
+                success = prepareProductsDataModel(resultSet);
             }
             break;
 
             case PAYMENTS: {
-                success = false;
+                success = preparePaymentsDataModel(resultSet);
             }
             break;
 
             case STOCKDIARY: {
-                success = false;
+                success = prepareStockDiaryDataModel(resultSet);
             }
             break;
 
@@ -183,27 +150,6 @@ public class ClientUploadManager extends Thread {
         }
 
         return success;
-    }
-
-    private boolean prepareCategoriesDataModel(ResultSet resultSet) {
-        try {
-            String id = resultSet.getString("ID");
-            String name = resultSet.getString("NAME");
-            String parentId = resultSet.getString("PARENTID");
-            String imageString = resultSet.getString("IMAGE");
-            String textTip = resultSet.getString("TEXTTIP");
-            boolean catShowName = resultSet.getBoolean("CATSHOWNAME");
-            sqlMethod = getSqlMethod(resultSet.getString("SQLMETHOD"));
-
-            dataModel = new Category(id, name, parentId, imageString, textTip, catShowName);
-            DATA_MODEL_ID = id;
-            
-        } catch (SQLException ex) {
-            Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
-
-        return true;
     }
 
     private boolean uploadData() {
@@ -371,8 +317,6 @@ public class ClientUploadManager extends Thread {
             pStatement = dbConnection.prepareStatement(sql);
             pStatement.setObject(1, DATA_MODEL_ID);
             pStatement.executeUpdate();
-            pStatement.close();
-            dbConnection.close();
         } catch (Exception e) {
             e.printStackTrace();
             increaseBatchUploadFailureCount();
@@ -473,5 +417,251 @@ public class ClientUploadManager extends Thread {
         }
 
         return sqlMethod.NONE;
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////
+    private boolean prepareCategoriesDataModel(ResultSet resultSet) {
+        try {
+            String id = resultSet.getString(Category.ID);
+            String name = resultSet.getString(Category.NAME);
+            String parentId = resultSet.getString(Category.PARENTID);
+            String imageString = resultSet.getString(Category.IMAGE);
+            String textTip = resultSet.getString(Category.TEXTTIP);
+            boolean catShowName = resultSet.getBoolean(Category.CATSHOWNAME);
+            sqlMethod = getSqlMethod(resultSet.getString("SQLMETHOD"));
+
+            dataModel = new Category(id, name, parentId, imageString, textTip, catShowName);
+            DATA_MODEL_ID = id;
+
+        } catch (SQLException ex) {
+            Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean prepareProductsDataModel(ResultSet resultSet) {
+        try {
+            String id = resultSet.getString(Product.ID);
+            String reference = resultSet.getString(Product.REFERENCE);
+            String code = resultSet.getString(Product.CODE);
+            String codetype = resultSet.getString(Product.CODETYPE);
+            String name = resultSet.getString(Product.NAME);
+            double priceBuy = resultSet.getDouble(Product.PRICEBUY);
+            double priceSell = resultSet.getDouble(Product.PRICESELL);
+            String category = resultSet.getString(Product.CATEGORY);
+            String taxcat = resultSet.getString(Product.TAXCAT);
+            String attributeset_id = resultSet.getString(Product.ATTRIBUTESET_ID);
+            double stockCost = resultSet.getDouble(Product.STOCKCOST);
+            double stockVolume = resultSet.getDouble(Product.STOCKVOLUME);
+            BufferedImage image = (BufferedImage) resultSet.getObject(Product.IMAGE);
+            boolean iscom = resultSet.getBoolean(Product.ISCOM);
+            boolean isScale = resultSet.getBoolean(Product.ISSCALE);
+            boolean isKitchen = resultSet.getBoolean(Product.ISKITCHEN);
+            boolean printkb = resultSet.getBoolean(Product.PRINTKB);
+            boolean sendStatus = resultSet.getBoolean(Product.SENDSTATUS);
+            boolean isService = resultSet.getBoolean(Product.ISSERVICE);
+            String attributes = resultSet.getString(Product.ATTRIBUTES);
+            String display = resultSet.getString(Product.DISPLAY);
+            boolean isVPrice = resultSet.getBoolean(Product.ISVPRICE);
+            boolean isVerpatrib = resultSet.getBoolean(Product.ISVERPATRIB);
+            String textTip = resultSet.getString(Product.TEXTTIP);
+            boolean warranty = resultSet.getBoolean(Product.WARRANTY);
+            double stockunits = resultSet.getDouble(Product.STOCKUNITS);
+            sqlMethod = getSqlMethod(resultSet.getString("SQLMETHOD"));
+
+            //String imageString = Base64.encodeAsString(ImageUtil.writeImage(image));
+            String imageString = "Test_Image";
+
+            dataModel = new Product(id, reference, code, codetype, name, priceBuy, priceSell, category, taxcat, attributeset_id, stockCost, stockVolume, imageString, iscom, isScale, isKitchen, printkb, sendStatus, isService, attributes, display, isVPrice, isVerpatrib, textTip, warranty, stockunits);
+            DATA_MODEL_ID = id;
+
+        } catch (SQLException ex) {
+            Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean preparePaymentsDataModel(ResultSet resultSet) {
+        try {
+            String id = resultSet.getString(Payment.ID);
+            String receipt = resultSet.getString(Payment.RECEIPT);
+            String payment = resultSet.getString(Payment.PAYMENT);
+            double total = resultSet.getDouble(Payment.TOTAL);
+            String transId = resultSet.getString(Payment.TRANSID);
+            String returnMsg = resultSet.getString(Payment.RETURNMSG);
+            String notes = resultSet.getString(Payment.NOTES);
+            double tendered = resultSet.getDouble(Payment.TENDERED);
+            String cardName = resultSet.getString(Payment.CARDNAME);
+
+            sqlMethod = getSqlMethod(resultSet.getString("SQLMETHOD"));
+            dataModel = new Payment(id, receipt, payment, total, transId, returnMsg, notes, tendered, cardName);
+            DATA_MODEL_ID = id;
+
+        } catch (SQLException ex) {
+            Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean prepareStockDiaryDataModel(ResultSet resultSet) {
+        try {
+            String id = resultSet.getString(StockDiary.ID);
+            Date time = resultSet.getDate(StockDiary.DATANEW);
+            int reason = resultSet.getInt(StockDiary.REASON);
+            String location = resultSet.getString(StockDiary.LOCATION);
+            String product = resultSet.getString(StockDiary.PRODUCT);
+            String attributeSetInstance_id = resultSet.getString(StockDiary.ATTRIBUTESETINSTANCE_ID);
+            double units = resultSet.getDouble(StockDiary.UNITS);
+            double price = resultSet.getDouble(StockDiary.PRICE);
+            String appUser = resultSet.getString(StockDiary.APPUSER);
+
+            String dateNew = time.toString();
+            sqlMethod = getSqlMethod(resultSet.getString("SQLMETHOD"));
+            dataModel = new StockDiary(id, dateNew, reason, location, product, attributeSetInstance_id, units, price, appUser);
+            DATA_MODEL_ID = id;
+
+        } catch (SQLException ex) {
+            Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+
+        return true;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    private boolean prepareCategoriesTable() {
+        boolean success = true;
+
+        if (data.length < 6) {
+            return false;
+        }
+
+        try {
+            String id = (String) data[0];
+            String name = (String) data[1];
+            String parentId = (String) data[2];
+            BufferedImage image = (BufferedImage) data[3];
+            String textTip = (String) data[4];
+            boolean catShowName = (Boolean) data[5];
+
+            //String imageString = Base64.encodeAsString(ImageUtil.writeImage(image));
+            String imageString = "Test_Image";
+            dataModel = new Category(id, name, parentId, imageString, textTip, catShowName);
+            DATA_MODEL_ID = id;
+        } catch (Exception e) {
+            success = false;
+        }
+
+        return success;
+    }
+
+    private boolean prepareProductsTable() {
+        boolean success = true;
+
+        if (data.length < 26) {
+            return false;
+        }
+
+        try {
+            String id = (String) data[0];
+            String reference = (String) data[1];
+            String code = (String) data[2];
+            String codetype = (String) data[3];
+            String name = (String) data[4];
+            double priceBuy = (Double) data[5];
+            double priceSell = (Double) data[6];
+            String category = (String) data[7];
+            String taxcat = (String) data[8];
+            String attributeset_id = (String) data[9];
+            double stockCost = (Double) data[10];
+            double stockVolume = (Double) data[11];
+            BufferedImage image = (BufferedImage) data[12];
+            boolean iscom = (Boolean) data[13];
+            boolean isScale = (Boolean) data[14];
+            boolean isKitchen = (Boolean) data[15];
+            boolean printkb = (Boolean) data[16];
+            boolean sendStatus = (Boolean) data[17];
+            boolean isService = (Boolean) data[18];
+            String attributes = (String) data[19];
+            String display = (String) data[20];
+            boolean isVPrice = (Boolean) data[21];
+            boolean isVerpatrib = (Boolean) data[22];
+            String textTip = (String) data[23];
+            boolean warranty = (Boolean) data[24];
+            double stockunits = (Double) data[25];
+
+            //String imageString = Base64.encodeAsString(ImageUtil.writeImage(image));
+            String imageString = "Test_Image";
+            dataModel = new Product(id, reference, code, codetype, name, priceBuy, priceSell, category, taxcat, attributeset_id, stockCost, stockVolume, imageString, iscom, isScale, isKitchen, printkb, sendStatus, isService, attributes, display, isVPrice, isVerpatrib, textTip, warranty, stockunits);
+            DATA_MODEL_ID = id;
+        } catch (Exception e) {
+            success = false;
+        }
+
+        return success;
+    }
+
+    private boolean preparePaymentsTable() {
+        boolean success = true;
+
+        if (data.length < 9) {
+            return false;
+        }
+
+        try {
+            String id = (String) data[0];
+            String receipt = (String) data[1];
+            String payment = (String) data[2];
+            double total = (Double) data[3];
+            String transId = (String) data[4];
+            String returnMsg = (String) data[5];
+            String notes = (String) data[6];
+            double tendered = (Double) data[7];
+            String cardName = (String) data[8];
+
+            dataModel = new Payment(id, receipt, payment, total, transId, returnMsg, notes, tendered, cardName);
+            DATA_MODEL_ID = id;
+
+        } catch (Exception e) {
+            success = false;
+        }
+
+        return success;
+    }
+
+    private boolean prepareStockDiaryTable() {
+        boolean success = true;
+
+        if (data.length < 9) {
+            return false;
+        }
+
+        try {
+            String id = (String) data[0];
+            Date time = (Date) data[1];
+            int reason = (Integer) data[2];
+            String location = (String) data[3];
+            String product = (String) data[4];
+            String attributeSetInstance_id = (String) data[5];
+            double units = (Double) data[6];
+            double price = (Double) data[7];
+            String appUser = (String) data[8];
+
+            String dateNew = time.toString();
+            
+            dataModel = new StockDiary(id, dateNew, reason, location, product, attributeSetInstance_id, units, price, appUser);
+            DATA_MODEL_ID = id;
+
+        } catch (Exception e) {
+            success = false;
+        }
+
+        return success;
     }
 }

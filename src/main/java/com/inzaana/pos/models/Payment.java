@@ -3,137 +3,137 @@ package com.inzaana.pos.models;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Payment
-{
+public class Payment extends DataModel {
 
-	private String	id;
-	private String	receipt;
-	private String	payment;
-	private double	total;
-	private String	transId;
-	private String	returnMsg;
-	private String	notes;
-	private double	tendered;
-	private String	cardName;
+    final static public String ID = "ID";
+    final static public String RECEIPT = "RECEIPT";
+    final static public String PAYMENT = "PAYMENT";
+    final static public String TOTAL = "TOTAL";
+    final static public String TRANSID = "TRANSID";
+    final static public String RETURNMSG = "RETURNMSG";
+    final static public String NOTES = "NOTES";
+    final static public String TENDERED = "TENDERED";
+    final static public String CARDNAME = "CARDNAME";
 
-	public Payment()
-	{
+    private String id;
+    private String receipt;
+    private String payment;
+    private double total;
+    private String transId;
+    private String returnMsg;
+    private String notes;
+    private double tendered;
+    private String cardName;
 
-	}
+    public Payment() {
 
-	/**
-	 * @param id
-	 * @param receipt
-	 * @param payment
-	 * @param total
-	 * @param transId
-	 * @param returnMsg
-	 * @param notes
-	 * @param tendered
-	 * @param cardName
-	 */
-	public Payment(String id, String receipt, String payment, double total, String transId, String returnMsg,
-			String notes, double tendered, String cardName)
-	{
-		this.id = id;
-		this.receipt = receipt;
-		this.payment = payment;
-		this.total = total;
-		this.transId = transId;
-		this.returnMsg = returnMsg;
-		this.notes = notes;
-		this.tendered = tendered;
-		this.cardName = cardName;
-	}
+    }
 
-	public String getId()
-	{
-		return id;
-	}
+    /**
+     * @param id
+     * @param receipt
+     * @param payment
+     * @param total
+     * @param transId
+     * @param returnMsg
+     * @param notes
+     * @param tendered
+     * @param cardName
+     */
+    public Payment(String id, String receipt, String payment, double total, String transId, String returnMsg,
+            String notes, double tendered, String cardName) {
+        this.id = id;
+        this.receipt = receipt;
+        this.payment = payment;
+        this.total = total;
+        this.transId = transId;
+        this.returnMsg = returnMsg;
+        this.notes = notes;
+        this.tendered = tendered;
+        this.cardName = cardName;
+    }
 
-	public void setId(String id)
-	{
-		this.id = id;
-	}
+    @Override
+    public String getId() {
+        return id;
+    }
 
-	public String getReceipt()
-	{
-		return receipt;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public void setReceipt(String receipt)
-	{
-		this.receipt = receipt;
-	}
+    public String getReceipt() {
+        return receipt;
+    }
 
-	public String getPayment()
-	{
-		return payment;
-	}
+    public void setReceipt(String receipt) {
+        this.receipt = receipt;
+    }
 
-	public void setPayment(String payment)
-	{
-		this.payment = payment;
-	}
+    public String getPayment() {
+        return payment;
+    }
 
-	public double getTotal()
-	{
-		return total;
-	}
+    public void setPayment(String payment) {
+        this.payment = payment;
+    }
 
-	public void setTotal(double total)
-	{
-		this.total = total;
-	}
+    public double getTotal() {
+        return total;
+    }
 
-	public String getTransId()
-	{
-		return transId;
-	}
+    public void setTotal(double total) {
+        this.total = total;
+    }
 
-	public void setTransId(String transId)
-	{
-		this.transId = transId;
-	}
+    public String getTransId() {
+        return transId;
+    }
 
-	public String getReturnMsg()
-	{
-		return returnMsg;
-	}
+    public void setTransId(String transId) {
+        this.transId = transId;
+    }
 
-	public void setReturnMsg(String returnMsg)
-	{
-		this.returnMsg = returnMsg;
-	}
+    public String getReturnMsg() {
+        return returnMsg;
+    }
 
-	public String getNotes()
-	{
-		return notes;
-	}
+    public void setReturnMsg(String returnMsg) {
+        this.returnMsg = returnMsg;
+    }
 
-	public void setNotes(String notes)
-	{
-		this.notes = notes;
-	}
+    public String getNotes() {
+        return notes;
+    }
 
-	public double getTendered()
-	{
-		return tendered;
-	}
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
 
-	public void setTendered(double tendered)
-	{
-		this.tendered = tendered;
-	}
+    public double getTendered() {
+        return tendered;
+    }
 
-	public String getCardName()
-	{
-		return cardName;
-	}
+    public void setTendered(double tendered) {
+        this.tendered = tendered;
+    }
 
-	public void setCardName(String cardName)
-	{
-		this.cardName = cardName;
-	}
+    public String getCardName() {
+        return cardName;
+    }
+
+    public void setCardName(String cardName) {
+        this.cardName = cardName;
+    }
+
+    @Override
+    public boolean insertRecordIntoDB(String userID) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean updateRecordInDB(String userID) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
 }
