@@ -3,10 +3,10 @@ package com.inzaana.pos.models;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class StockDiary extends DataModel{
+public class StockDiary extends DataModel {
 
     final static public String ID = "ID";
-    final static public String DATANEW = "DATANEW";
+    final static public String DATENEW = "DATENEW";
     final static public String REASON = "REASON";
     final static public String LOCATION = "LOCATION";
     final static public String PRODUCT = "PRODUCT";
@@ -14,7 +14,7 @@ public class StockDiary extends DataModel{
     final static public String UNITS = "UNITS";
     final static public String PRICE = "PRICE";
     final static public String APPUSER = "APPUSER";
-    
+
     private String id;
     private String dateNew;
     private int reason;
@@ -53,7 +53,6 @@ public class StockDiary extends DataModel{
         this.appUser = appUser;
     }
 
-    @Override
     public String getId() {
         return id;
     }

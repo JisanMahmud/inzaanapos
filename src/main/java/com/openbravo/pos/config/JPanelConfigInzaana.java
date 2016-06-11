@@ -140,7 +140,7 @@ public class JPanelConfigInzaana extends javax.swing.JPanel implements PanelConf
 
     @Override
     public boolean hasChanged() {
-        return true;
+        return false;
     }
 
     @Override

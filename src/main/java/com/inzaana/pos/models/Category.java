@@ -52,7 +52,6 @@ public class Category extends DataModel {
         this.setCatShowName(catShowName);
     }
 
-    @Override
     public String getId() {
         return id;
     }

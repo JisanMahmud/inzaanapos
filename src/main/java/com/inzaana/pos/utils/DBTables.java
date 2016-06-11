@@ -5,8 +5,7 @@ public enum DBTables
 	CATEGORIES("CATEGORIES"), //
 	PRODUCTS("PRODUCTS"), //
 	PAYMENTS("Payment"), //
-	STOCKDIARY("STOCKDIARY"), //
-	USERS("USERS"); //
+	STOCKDIARY("STOCKDIARY");
 
 	String	tableName;
 

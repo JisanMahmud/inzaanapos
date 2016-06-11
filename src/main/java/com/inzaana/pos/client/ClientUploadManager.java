@@ -36,6 +36,14 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import org.springframework.util.StringUtils;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JProgressBar;
+import javax.swing.border.Border;
+
 public class ClientUploadManager extends Thread {
 
     private String DATA_MODEL_ID = "NOT_FOUND";
@@ -361,6 +369,21 @@ public class ClientUploadManager extends Thread {
         batchUploadSuccessCount = 0;
         batchUploadFailureCount = 0;
 
+//        JFrame f = new JFrame("Uploading to Inzaana Server");
+//        f.setLocationRelativeTo(null);
+//        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        f.setAlwaysOnTop(true);
+//        Container content = f.getContentPane();
+//        JProgressBar progressBar = new JProgressBar();
+//        progressBar.setValue(0);
+//        progressBar.setStringPainted(true);
+//        Border border = BorderFactory.createTitledBorder("Uploading...");
+//        progressBar.setBorder(border);
+//        content.add(progressBar, BorderLayout.NORTH);
+//        f.setSize(500, 100);
+//        f.setVisible(true);
+//        int counter = 0;
+
         for (DBTables table : DBTables.values()) {
             this.dbTable = table;
 
@@ -373,6 +396,7 @@ public class ClientUploadManager extends Thread {
             try {
                 session = AppViewConnection.createSession(m_config);
                 dbConnection = session.getConnection();
+
                 pStatement = dbConnection.prepareStatement(sql);
 
                 pStatement = dbConnection.prepareStatement(sql);
@@ -405,7 +429,19 @@ public class ClientUploadManager extends Thread {
 
                 session.close();
             }
+            
+//            if (!f.isShowing())
+//            {
+//                break;
+//            }
+//            else
+//            {
+//                counter += 25;
+//                progressBar.setValue(counter);
+//            }
         }
+        
+//        f.dispose();
 
     }
 
@@ -512,7 +548,7 @@ public class ClientUploadManager extends Thread {
     private boolean prepareStockDiaryDataModel(ResultSet resultSet) {
         try {
             String id = resultSet.getString(StockDiary.ID);
-            Date time = resultSet.getDate(StockDiary.DATANEW);
+            Date time = resultSet.getDate(StockDiary.DATENEW);
             int reason = resultSet.getInt(StockDiary.REASON);
             String location = resultSet.getString(StockDiary.LOCATION);
             String product = resultSet.getString(StockDiary.PRODUCT);
@@ -654,7 +690,7 @@ public class ClientUploadManager extends Thread {
             String appUser = (String) data[8];
 
             String dateNew = time.toString();
-            
+
             dataModel = new StockDiary(id, dateNew, reason, location, product, attributeSetInstance_id, units, price, appUser);
             DATA_MODEL_ID = id;
 

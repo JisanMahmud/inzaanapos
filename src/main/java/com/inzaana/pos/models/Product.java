@@ -143,7 +143,6 @@ public class Product extends DataModel {
         this.setStockunits(stockunits);
     }
 
-    @Override
     public String getId() {
         return id;
     }
