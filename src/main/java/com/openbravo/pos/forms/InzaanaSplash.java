@@ -5,18 +5,10 @@
  */
 package com.openbravo.pos.forms;
 
-import com.openbravo.basic.BasicException;
-import com.openbravo.data.gui.JMessageDialog;
-import com.openbravo.data.gui.MessageInf;
 import com.openbravo.data.loader.Session;
-import java.net.InetAddress;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -26,7 +18,6 @@ import javax.swing.JOptionPane;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -36,13 +27,7 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.internal.util.Base64;
 
-import com.inzaana.pos.models.Category;
-import com.inzaana.pos.models.DataModel;
-import com.inzaana.pos.utils.ImageUtil;
 import com.inzaana.pos.utils.Authenticator;
-import com.inzaana.pos.utils.InzaanaDBTables;
-import java.io.File;
-import java.util.ArrayList;
 
 /**
  *

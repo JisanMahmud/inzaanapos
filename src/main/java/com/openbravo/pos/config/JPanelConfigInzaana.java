@@ -6,10 +6,12 @@
 package com.openbravo.pos.config;
 
 import com.inzaana.pos.client.ClientUploadManager;
+import com.inzaana.pos.utils.InzaanaProgressBar;
 import com.openbravo.pos.forms.AppConfig;
 import com.openbravo.pos.forms.InzaanaSplash;
 import java.awt.Component;
 import java.util.prefs.Preferences;
+import javax.swing.JFrame;
 
 /**
  *
@@ -109,8 +111,23 @@ public class JPanelConfigInzaana extends javax.swing.JPanel implements PanelConf
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        ClientUploadManager uploadManager = new ClientUploadManager();
-        uploadManager.startBatchUpload();
+        final ClientUploadManager uploadManager = new ClientUploadManager();
+        JFrame frame = new JFrame();
+        final InzaanaProgressBar progressBar = new InzaanaProgressBar(frame);
+        progressBar.setModal(true);
+        progressBar.setLocationRelativeTo(null);
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                uploadManager.startBatchUpload(progressBar);
+            }
+        };
+        
+        Thread thread = new Thread(runnable);
+        thread.start();
+        
+        progressBar.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
 

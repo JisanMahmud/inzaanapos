@@ -19,6 +19,7 @@ import com.inzaana.pos.models.Payment;
 import com.inzaana.pos.models.Product;
 import com.inzaana.pos.models.StockDiary;
 import com.inzaana.pos.utils.Authenticator;
+import com.inzaana.pos.utils.InzaanaProgressBar;
 import com.openbravo.data.loader.Session;
 import com.openbravo.pos.forms.AppConfig;
 import com.openbravo.pos.forms.AppLocal;
@@ -29,20 +30,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import org.springframework.util.StringUtils;
-
-import java.awt.BorderLayout;
-import java.awt.Container;
-
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JProgressBar;
-import javax.swing.border.Border;
 
 public class ClientUploadManager extends Thread {
 
@@ -54,6 +48,8 @@ public class ClientUploadManager extends Thread {
     private Object[] data = null;
     private boolean isBatchUpload = false;
     private DataModel dataModel = null;
+
+    InzaanaProgressBar progressBar;
 
     AppConfig m_config;
 
@@ -93,6 +89,8 @@ public class ClientUploadManager extends Thread {
     }
 
     private boolean prepareTables() {
+        updateProgressBarStatus("Preparing Table for " + dbTable.toString());
+
         boolean success = false;
         if (isBatchUpload) {
             return true; // because we have already prepared the table.
@@ -105,11 +103,6 @@ public class ClientUploadManager extends Thread {
 
             case PRODUCTS: {
                 success = prepareProductsTable();
-            }
-            break;
-
-            case PAYMENTS: {
-                success = preparePaymentsTable();
             }
             break;
 
@@ -128,6 +121,8 @@ public class ClientUploadManager extends Thread {
     }
 
     private boolean prepareDataModel(ResultSet resultSet) {
+        updateProgressBarStatus("Preparing data model for " + dbTable.toString());
+
         boolean success = false;
 
         switch (dbTable) {
@@ -138,11 +133,6 @@ public class ClientUploadManager extends Thread {
 
             case PRODUCTS: {
                 success = prepareProductsDataModel(resultSet);
-            }
-            break;
-
-            case PAYMENTS: {
-                success = preparePaymentsDataModel(resultSet);
             }
             break;
 
@@ -165,6 +155,8 @@ public class ClientUploadManager extends Thread {
         if (dataModel == null) {
             return false;
         }
+
+        updateProgressBarStatus("Uploading data...");
 
         ClientConfig config = new ClientConfig();
 
@@ -221,10 +213,17 @@ public class ClientUploadManager extends Thread {
         if (response == null) {
             return false;
         }
-        if (response.getStatus() != 200) {
+
+        int status = response.getStatus();
+        String entity = response.readEntity(String.class);
+
+        updateProgressBarStatus("Response Status: " + String.valueOf(status));
+        updateProgressBarStatus("Response Entity: " + entity);
+
+        if (status != 200) {
             return false;
         }
-        if (response.readEntity(String.class).contains("fail")) {
+        if (entity.contains("fail")) {
             return false;
         }
 
@@ -237,6 +236,8 @@ public class ClientUploadManager extends Thread {
     }
 
     private void saveDataToDatabase() {
+        updateProgressBarStatus("Upload Failed. Saving to local database");
+
         int occurance = StringUtils.countOccurrencesOf(sqlForInzaana, "?");
         Session session_1 = null;
         Connection dbConnection_1 = null;
@@ -259,6 +260,7 @@ public class ClientUploadManager extends Thread {
 
         } catch (Exception e) {
             e.printStackTrace();
+            updateProgressBarStatus(e.getMessage());
         } finally {
             try {
                 if (pStatement_1 != null) {
@@ -293,6 +295,7 @@ public class ClientUploadManager extends Thread {
             pStatement_2.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
+            updateProgressBarStatus(e.getMessage());
         } finally {
             try {
                 if (pStatement_2 != null) {
@@ -315,6 +318,8 @@ public class ClientUploadManager extends Thread {
     }
 
     private boolean deleteDataFromDatabase() {
+        updateProgressBarStatus("Upload Successful. Deleting from local db");
+
         String sql = "DELETE FROM " + dbTable.ToString() + "_INZAANA" + " WHERE ID=?;";
         Session session = null;
         Connection dbConnection = null;
@@ -327,6 +332,7 @@ public class ClientUploadManager extends Thread {
             pStatement.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
+            updateProgressBarStatus(e.getMessage());
             increaseBatchUploadFailureCount();
             return false;
         } finally {
@@ -364,28 +370,27 @@ public class ClientUploadManager extends Thread {
         batchUploadFailureCount++;
     }
 
-    public void startBatchUpload() {
+    public void startBatchUpload(InzaanaProgressBar progressBar) {
         isBatchUpload = true;
         batchUploadSuccessCount = 0;
         batchUploadFailureCount = 0;
+        this.progressBar = progressBar;
+        int progress = 0;
 
-//        JFrame f = new JFrame("Uploading to Inzaana Server");
-//        f.setLocationRelativeTo(null);
-//        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        f.setAlwaysOnTop(true);
-//        Container content = f.getContentPane();
-//        JProgressBar progressBar = new JProgressBar();
-//        progressBar.setValue(0);
-//        progressBar.setStringPainted(true);
-//        Border border = BorderFactory.createTitledBorder("Uploading...");
-//        progressBar.setBorder(border);
-//        content.add(progressBar, BorderLayout.NORTH);
-//        f.setSize(500, 100);
-//        f.setVisible(true);
-//        int counter = 0;
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        updateProgressBarStatus("Batch upload started at " + dateFormat.format(date));
 
         for (DBTables table : DBTables.values()) {
             this.dbTable = table;
+
+            if (dbTable == DBTables.NONE) {
+                continue;
+            }
+
+            updateProgressBarStatus("----------------------------------");
+            updateProgressBarStatus("Uploading " + dbTable.toString() + " data...");
+            updateProgressBarStatus("----------------------------------");
 
             String sql = "SELECT * FROM " + dbTable.ToString() + "_INZAANA;";
             Session session = null;
@@ -411,38 +416,61 @@ public class ClientUploadManager extends Thread {
                 e.printStackTrace();
             } finally {
                 try {
-                    resultSet.close();
+                    if (resultSet != null) {
+                        resultSet.close();
+                    }
                 } catch (SQLException ex) {
                     Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 try {
-                    pStatement.close();
+                    if (pStatement != null) {
+                        pStatement.close();
+                    }
                 } catch (SQLException ex) {
                     Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 try {
-                    dbConnection.close();
+                    if (dbConnection != null) {
+                        dbConnection.close();
+                    }
                 } catch (SQLException ex) {
                     Logger.getLogger(ClientUploadManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
-                session.close();
+                if (session != null) {
+                    session.close();
+                }
             }
-            
-//            if (!f.isShowing())
-//            {
-//                break;
-//            }
-//            else
-//            {
-//                counter += 25;
-//                progressBar.setValue(counter);
-//            }
-        }
-        
-//        f.dispose();
 
+            if (progressBar != null && progressBar.isVisible()) {
+                progress += 33;
+                progressBar.setProgress(progress);
+            } else {
+                break;
+            }
+        }
+
+        finalizeUpload();
+    }
+
+    private void updateProgressBarStatus(String status) {
+        if (progressBar != null) {
+            progressBar.setStatusMessage(status);
+        }
+    }
+
+    private void finalizeUpload() {
+        if (progressBar != null) {
+            progressBar.setProgress(100);
+
+            progressBar.setStatusMessage("\n----------------------------------");
+            progressBar.setStatusMessage("    Upload Completed          ");
+            progressBar.setStatusMessage("----------------------------------");
+            progressBar.setStatusMessage("    Success Count : " + String.valueOf(batchUploadSuccessCount));
+            progressBar.setStatusMessage("    Failure Count : " + String.valueOf(batchUploadFailureCount));
+            progressBar.setStatusMessage("----------------------------------");
+        }
     }
 
     private SQLMethod getSqlMethod(String method) {

@@ -4,9 +4,9 @@ public enum DBTables
 {
 	CATEGORIES("CATEGORIES"), //
 	PRODUCTS("PRODUCTS"), //
-	PAYMENTS("PAYMENTS"), //
+//	PAYMENTS("PAYMENTS"), //
 	STOCKDIARY("STOCKDIARY"), //
-	USERS("USERS"), //
+//	USERS("USERS"), //
 	NONE("NONE"); //
 
 	String	tableName;

@@ -22,7 +22,6 @@ package com.openbravo.data.loader;
 import com.inzaana.pos.client.ClientUploadManager;
 import com.inzaana.pos.client.SQLMethod;
 import com.inzaana.pos.client.SQLProcessor;
-import com.inzaana.pos.utils.DBTables;
 import com.openbravo.basic.BasicException;
 import java.sql.*;
 import java.util.logging.Level;
