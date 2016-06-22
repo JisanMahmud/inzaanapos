@@ -138,6 +138,25 @@ INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('60', 'Window.Title', 0
 INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('61', 'script.posapps', 0, $FILE{/com/openbravo/pos/templates/script.posapps.txt});
 INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('62', 'img.posapps', 1, $FILE{/com/openbravo/pos/templates/img.posapps.png});
 
+-- For Indian Rupee
+
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('63', 'half_rupee_coin', 1, $FILE{/com/openbravo/pos/templates/half_rupee_coin.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('64', '1_rupee_coin', 1, $FILE{/com/openbravo/pos/templates/1_rupee_coin.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('65', '1_rupee_note', 1, $FILE{/com/openbravo/pos/templates/1_rupee_note.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('66', '2_rupee_coin', 1, $FILE{/com/openbravo/pos/templates/2_rupee_coin.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('67', '2_rupee_note', 1, $FILE{/com/openbravo/pos/templates/2_rupee_note.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('68', '5_rupee_coin', 1, $FILE{/com/openbravo/pos/templates/5_rupee_coin.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('69', '5_rupee_note', 1, $FILE{/com/openbravo/pos/templates/5_rupee_note.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('70', '10_rupee_coin', 1, $FILE{/com/openbravo/pos/templates/10_rupee_coin.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('71', '10_rupee_note', 1, $FILE{/com/openbravo/pos/templates/10_rupee_note.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('72', '20_rupee_note', 1, $FILE{/com/openbravo/pos/templates/20_rupee_note.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('73', '50_rupee_note', 1, $FILE{/com/openbravo/pos/templates/50_rupee_note.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('74', '100_rupee_note', 1, $FILE{/com/openbravo/pos/templates/100_rupee_note.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('75', '500_rupee_note', 1, $FILE{/com/openbravo/pos/templates/500_rupee_note.png});
+INSERT INTO RESOURCES(ID, NAME, RESTYPE, CONTENT) VALUES('76', '1000_rupee_note', 1, $FILE{/com/openbravo/pos/templates/1000_rupee_note.png});
+
+
+
 CREATE TABLE TAXCUSTCATEGORIES (
     ID VARCHAR(255) NOT NULL,
     NAME VARCHAR(255) NOT NULL,
@@ -419,9 +438,7 @@ CREATE TABLE STOCKCURRENT (
     PRODUCT VARCHAR(255) NOT NULL,
     ATTRIBUTESETINSTANCE_ID VARCHAR(255),
     UNITS DOUBLE NOT NULL,
-    CONSTRAINT STOCKCURRENT_FK_1 FOREIGN KEY (PRODUCT) REFERENCES PRODUCTS(ID)
-	ON DELETE CASCADE
-    ON UPDATE CASCADE,
+    CONSTRAINT STOCKCURRENT_FK_1 FOREIGN KEY (PRODUCT) REFERENCES PRODUCTS(ID) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT STOCKCURRENT_ATTSETINST FOREIGN KEY (ATTRIBUTESETINSTANCE_ID) REFERENCES ATTRIBUTESETINSTANCE(ID),
     CONSTRAINT STOCKCURRENT_FK_2 FOREIGN KEY (LOCATION) REFERENCES LOCATIONS(ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

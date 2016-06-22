@@ -18,15 +18,17 @@
 //    along with uniCenta oPOS.  If not, see <http://www.gnu.org/licenses/>.
 // *************************************************************************
 
-payment.addButton("note.50", 50.0);
-payment.addButton("note.20", 20.0);
-payment.addButton("note.10", 10.0);
-payment.addButton("note.5", 5.0);
-payment.addButton("coin.2", 2.0);
-payment.addButton("coin.1", 1.0);
-payment.addButton("coin.50", 0.50);
-payment.addButton("coin.20", 0.20);
-payment.addButton("coin.10", 0.10);
-payment.addButton("coin.05", 0.05);
-payment.addButton("coin.02", 0.02);
-payment.addButton("coin.01", 0.01);
+payment.addButton("1000_rupee_note", 1000.0);
+payment.addButton("500_rupee_note", 500.0);
+payment.addButton("100_rupee_note", 100.0);
+payment.addButton("50_rupee_note", 50.0);
+payment.addButton("20_rupee_note", 20.0);
+payment.addButton("10_rupee_note", 10.0);
+payment.addButton("5_rupee_note", 5.0);
+payment.addButton("2_rupee_note", 2.0);
+payment.addButton("1_rupee_note", 1.0);
+payment.addButton("10_rupee_coin", 10.0);
+payment.addButton("5_rupee_coin", 5.0);
+payment.addButton("2_rupee_coin", 2.0);
+payment.addButton("1_rupee_coin", 1.0);
+payment.addButton("half_rupee_coin", 0.50);

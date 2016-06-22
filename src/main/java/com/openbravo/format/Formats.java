@@ -96,7 +96,7 @@ public abstract class Formats {
     private static NumberFormat m_percentformat = new DecimalFormat("#,##0.##%");
     
     private static DateFormat m_dateformat = DateFormat.getDateInstance();
-    private static DateFormat m_timeformat = DateFormat.getTimeInstance();
+        private static DateFormat m_timeformat = DateFormat.getTimeInstance();
     private static DateFormat m_datetimeformat = DateFormat.getDateTimeInstance();
    
     private static final DateFormat m_hourminformat = new SimpleDateFormat("H:mm:ss");
@@ -180,6 +180,15 @@ public abstract class Formats {
         }
     }
 
+    public static void setIndianCurrencySymbol() {
+        if (m_currencyformat == null) {
+            m_currencyformat = NumberFormat.getCurrencyInstance();
+        }
+        DecimalFormatSymbols decimalFormatSymbols = ((DecimalFormat) m_currencyformat).getDecimalFormatSymbols();
+        decimalFormatSymbols.setCurrencySymbol("\u20B9"); // For Indian Currency Symbol
+        ((DecimalFormat) m_currencyformat).setDecimalFormatSymbols(decimalFormatSymbols);
+    }
+    
     /**
      *
      * @param pattern

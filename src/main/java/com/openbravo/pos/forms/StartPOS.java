@@ -98,6 +98,7 @@ public class StartPOS {
                 Formats.setIntegerPattern(config.getProperty("format.integer"));
                 Formats.setDoublePattern(config.getProperty("format.double"));
                 Formats.setCurrencyPattern(config.getProperty("format.currency"));
+//                Formats.setIndianCurrencySymbol();
                 Formats.setPercentPattern(config.getProperty("format.percent"));
                 Formats.setDatePattern(config.getProperty("format.date"));
                 Formats.setTimePattern(config.getProperty("format.time"));
