@@ -203,7 +203,7 @@ public class AppConfig implements AppProperties {
 //        m_propsconfig.setProperty("db.password", "");
         
 //        m_propsconfig.setProperty("db.driver", "com.mysql.jdbc.Driver");
-//        m_propsconfig.setProperty("db.URL", "jdbc:mysql://localhost:3306/database");
+//        m_p ropsconfig.setProperty("db.URL", "jdbc:mysql://localhost:3306/database");
 //        m_propsconfig.setProperty("db.user", "user");         
 //        m_propsconfig.setProperty("db.password", "password");
         
@@ -219,7 +219,8 @@ public class AppConfig implements AppProperties {
   */       
         m_propsconfig.setProperty("machine.hostname", getLocalHostName());
         
-        Locale l = Locale.getDefault();
+//        Locale l = Locale.getDefault();
+        Locale l = new Locale("en", "IN", "");
         m_propsconfig.setProperty("user.language", l.getLanguage());
         m_propsconfig.setProperty("user.country", l.getCountry());
         m_propsconfig.setProperty("user.variant", l.getVariant());     
@@ -271,7 +272,5 @@ public class AppConfig implements AppProperties {
         
 //JG July 2014 - Thank you Ron Isaacson On-screen receipt defauls to 42 columns
         m_propsconfig.setProperty("screen.receipt.columns", "42");        
-        
-
     }
 }

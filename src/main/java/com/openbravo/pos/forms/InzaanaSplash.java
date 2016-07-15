@@ -91,38 +91,6 @@ public class InzaanaSplash extends javax.swing.JFrame {
         return true;
     }
 
-    public void initializeInzaanaDBTables() {
-
-//        AppConfig m_config = new AppConfig(new File((System.getProperty("user.home")), AppLocal.APP_ID + ".properties"));
-//        m_config.load();
-//
-//        try {
-//            s = AppViewConnection.createSession(m_config);
-//            con = s.getConnection();
-//        } catch (BasicException e) {
-//            System.out.println(e);
-//            JMessageDialog.showMessage(this, new MessageInf(MessageInf.SGN_DANGER, e.getMessage(), e));
-//        } catch (SQLException ex) {
-//            Logger.getLogger(InzaanaSplash.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//
-//        InzaanaDBTables dbTableCreator = new InzaanaDBTables();
-//
-//        System.out.println("Initializing DB Tables ...");
-//        ArrayList<String> sqlList = new ArrayList<String>();
-//        sqlList.add(dbTableCreator.getSQLForCategoriesTable());
-//        sqlList.add(dbTableCreator.getSQLForProductsTable());
-//
-//        for (String sql : sqlList) {
-//            try {
-//                System.out.println("INZAANA SQL: " + sql);
-//                pstmt = con.prepareStatement(sql);
-//                pstmt.executeUpdate();
-//            } catch (Exception e) {
-//            }
-//        }
-    }
-
     private String getPasswordFromRegistry() {
         Preferences preference = Preferences.userRoot();
         return preference.get(INZAANA_SECURITY_KEY, "NOT_FOUND");

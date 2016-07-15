@@ -31,19 +31,21 @@ import java.util.List;
 
 /**
  *
- * @author  adrianromero
+ * @author adrianromero
  */
 public class JPanelConfigLocale extends javax.swing.JPanel implements PanelConfig {
-    
+
     private final DirtyManager dirty = new DirtyManager();
-    
+
     private final static String DEFAULT_VALUE = "(Default)";
 
-    /** Creates new form JPanelConfigLocale */
+    /**
+     * Creates new form JPanelConfigLocale
+     */
     public JPanelConfigLocale() {
-        
+
         initComponents();
-        
+
         jcboLocale.addActionListener(dirty);
         jcboInteger.addActionListener(dirty);
         jcboDouble.addActionListener(dirty);
@@ -52,41 +54,45 @@ public class JPanelConfigLocale extends javax.swing.JPanel implements PanelConfi
         jcboDate.addActionListener(dirty);
         jcboTime.addActionListener(dirty);
         jcboDatetime.addActionListener(dirty);
-        
+
         List<Locale> availablelocales = new ArrayList<>();
         availablelocales.addAll(Arrays.asList(Locale.getAvailableLocales())); // Available java locales
         addLocale(availablelocales, new Locale("eu", "ES", "")); // Basque
         addLocale(availablelocales, new Locale("gl", "ES", "")); // Gallegan
-        
+
         Collections.sort(availablelocales, new LocaleComparator());
-        
-        jcboLocale.addItem(new LocaleInfo (null));
+
+        jcboLocale.addItem(new LocaleInfo(null));
         for (Locale l : availablelocales) {
             jcboLocale.addItem(new LocaleInfo(l));
         }
-        
+
         jcboInteger.addItem(DEFAULT_VALUE);
         jcboInteger.addItem("#0");
         jcboInteger.addItem("#,##0");
-        
+
         jcboDouble.addItem(DEFAULT_VALUE);
         jcboDouble.addItem("#0.0");
         jcboDouble.addItem("#,##0.#");
-        
+
         jcboCurrency.addItem(DEFAULT_VALUE);
+        jcboCurrency.addItem("\u20B9 #,##0.00");
+        jcboCurrency.addItem("'Rs.'#,##0.00");
+        jcboCurrency.addItem("'INR.'#,##0.00");
+        
         jcboCurrency.addItem("\u00A4 #0.00");
         jcboCurrency.addItem("'$' #,##0.00");
-        
+
         jcboPercent.addItem(DEFAULT_VALUE);
         jcboPercent.addItem("#,##0.##%");
-        
+
         jcboDate.addItem(DEFAULT_VALUE);
 //        jcboDate.addItem(DEFAULT_VALUE);
-        
+
         jcboTime.addItem(DEFAULT_VALUE);
-        
+
         jcboDatetime.addItem(DEFAULT_VALUE);
-               
+
     }
 
     private void addLocale(List<Locale> ll, Locale l) {
@@ -94,7 +100,7 @@ public class JPanelConfigLocale extends javax.swing.JPanel implements PanelConfi
             ll.add(l);
         }
     }
-    
+
     /**
      *
      * @return
@@ -103,7 +109,7 @@ public class JPanelConfigLocale extends javax.swing.JPanel implements PanelConfi
     public boolean hasChanged() {
         return dirty.isDirty();
     }
-    
+
     /**
      *
      * @return
@@ -112,31 +118,36 @@ public class JPanelConfigLocale extends javax.swing.JPanel implements PanelConfi
     public Component getConfigComponent() {
         return this;
     }
-   
+
     /**
      *
      * @param config
      */
     @Override
     public void loadProperties(AppConfig config) {
-        
+
         String slang = config.getProperty("user.language");
         String scountry = config.getProperty("user.country");
         String svariant = config.getProperty("user.variant");
-        
-        if (slang != null && !slang.equals("") && scountry != null && svariant != null) {                    
-            Locale currentlocale = new Locale(slang, scountry, svariant);
-            for (int i = 0 ; i < jcboLocale.getItemCount(); i++)  {
-                LocaleInfo l = (LocaleInfo) jcboLocale.getItemAt(i);
-                if (currentlocale.equals(l.getLocale())) {
-                    jcboLocale.setSelectedIndex(i);
-                    break;
-                }
-            }        
+
+        Locale currentlocale;
+
+        if (slang != null && !slang.equals("") && scountry != null && svariant != null) {
+            currentlocale = new Locale(slang, scountry, svariant);
+
         } else {
-            jcboLocale.setSelectedIndex(0);
+//            jcboLocale.setSelectedIndex(0);
+            currentlocale = new Locale("en", "IN", "");
         }
-        
+
+        for (int i = 0; i < jcboLocale.getItemCount(); i++) {
+            LocaleInfo l = (LocaleInfo) jcboLocale.getItemAt(i);
+            if (currentlocale.equals(l.getLocale())) {
+                jcboLocale.setSelectedIndex(i);
+                break;
+            }
+        }
+
         jcboInteger.setSelectedItem(writeWithDefault(config.getProperty("format.integer")));
         jcboDouble.setSelectedItem(writeWithDefault(config.getProperty("format.double")));
         jcboCurrency.setSelectedItem(writeWithDefault(config.getProperty("format.currency")));
@@ -144,17 +155,17 @@ public class JPanelConfigLocale extends javax.swing.JPanel implements PanelConfi
         jcboDate.setSelectedItem(writeWithDefault(config.getProperty("format.date")));
         jcboTime.setSelectedItem(writeWithDefault(config.getProperty("format.time")));
         jcboDatetime.setSelectedItem(writeWithDefault(config.getProperty("format.datetime")));
-               
+
         dirty.setDirty(false);
     }
-    
+
     /**
      *
      * @param config
      */
     @Override
     public void saveProperties(AppConfig config) {
-        
+
         Locale l = ((LocaleInfo) jcboLocale.getSelectedItem()).getLocale();
         if (l == null) {
             config.setProperty("user.language", "");
@@ -164,11 +175,11 @@ public class JPanelConfigLocale extends javax.swing.JPanel implements PanelConfi
             config.setProperty("user.language", l.getLanguage());
             config.setProperty("user.country", l.getCountry());
             config.setProperty("user.variant", l.getVariant());
-System.out.println(l.getLanguage());
-System.out.println(l.getCountry());
-System.out.println(l.getVariant());
+            System.out.println(l.getLanguage());
+            System.out.println(l.getCountry());
+            System.out.println(l.getVariant());
         }
-         
+
         config.setProperty("format.integer", readWithDefault(jcboInteger.getSelectedItem()));
         config.setProperty("format.double", readWithDefault(jcboDouble.getSelectedItem()));
         config.setProperty("format.currency", readWithDefault(jcboCurrency.getSelectedItem()));
@@ -176,10 +187,10 @@ System.out.println(l.getVariant());
         config.setProperty("format.date", readWithDefault(jcboDate.getSelectedItem()));
         config.setProperty("format.time", readWithDefault(jcboTime.getSelectedItem()));
         config.setProperty("format.datetime", readWithDefault(jcboDatetime.getSelectedItem()));
-        
+
         dirty.setDirty(false);
     }
-    
+
     private String readWithDefault(Object value) {
         if (DEFAULT_VALUE.equals(value)) {
             return "";
@@ -187,7 +198,7 @@ System.out.println(l.getVariant());
             return value.toString();
         }
     }
-    
+
     private Object writeWithDefault(String value) {
         if (value == null || value.equals("") || value.equals(DEFAULT_VALUE)) {
             return DEFAULT_VALUE;
@@ -195,28 +206,31 @@ System.out.println(l.getVariant());
             return value;
         }
     }
-    
+
     private static class LocaleInfo {
+
         private final Locale locale;
-        
+
         public LocaleInfo(Locale locale) {
             this.locale = locale;
         }
+
         public Locale getLocale() {
             return locale;
         }
+
         @Override
         public String toString() {
-            return locale == null 
-                    ? "(System default)" 
+            return locale == null
+                    ? "(System default)"
                     : locale.getDisplayName();
         }
     }
-    
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -386,8 +400,8 @@ System.out.println(l.getVariant());
                 .addContainerGap(48, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
-    
-    
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -407,5 +421,5 @@ System.out.println(l.getVariant());
     private javax.swing.JComboBox jcboPercent;
     private javax.swing.JComboBox jcboTime;
     // End of variables declaration//GEN-END:variables
-    
+
 }

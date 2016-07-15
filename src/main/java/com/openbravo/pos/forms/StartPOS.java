@@ -93,12 +93,16 @@ public class StartPOS {
                 if (slang != null && !slang.equals("") && scountry != null && svariant != null) {                                        
                     Locale.setDefault(new Locale(slang, scountry, svariant));
                 }
+                else
+                {
+                    Locale.setDefault(new Locale("en", "IN", ""));
+                }
                 
                 // Set the format patterns
                 Formats.setIntegerPattern(config.getProperty("format.integer"));
                 Formats.setDoublePattern(config.getProperty("format.double"));
                 Formats.setCurrencyPattern(config.getProperty("format.currency"));
-//                Formats.setIndianCurrencySymbol();
+                //Formats.setIndianCurrencySymbol();
                 Formats.setPercentPattern(config.getProperty("format.percent"));
                 Formats.setDatePattern(config.getProperty("format.date"));
                 Formats.setTimePattern(config.getProperty("format.time"));
