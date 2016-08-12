@@ -30,12 +30,12 @@ public class AppLocal {
     /**
      *
      */
-    public static final String APP_NAME = "Inzaana oPOS";
+    public static final String APP_NAME = "OnlyNe oPOS";
 
     /**
      *
      */
-    public static final String APP_ID = "inzaanaopos";
+    public static final String APP_ID = "onlyneopos";
 
     /**
      *

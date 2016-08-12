@@ -1,1 +1,1 @@
-# Inzaana oPOS
+# OnlyNe oPOS
