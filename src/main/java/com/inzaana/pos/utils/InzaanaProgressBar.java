@@ -47,7 +47,7 @@ public class InzaanaProgressBar extends JDialog {
     }
 
     public void setProgress(int progress) {
-        progressBar.setValue(progress);
+        //progressBar.setValue(progress);
     }
 
     public void setStatusMessage(String status) {

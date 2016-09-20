@@ -229,7 +229,7 @@ public class InzaanaSplash extends javax.swing.JFrame {
 
         jLabel4.setText("User Id:");
 
-        jTextField2.setText("http://localhost:8080/pos");
+        jTextField2.setText("http://192.169.196.162:8080/pos");
         jTextField2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField2ActionPerformed(evt);

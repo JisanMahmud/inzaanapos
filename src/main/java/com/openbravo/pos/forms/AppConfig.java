@@ -190,10 +190,20 @@ public class AppConfig implements AppProperties {
         String dirname = System.getProperty("dirname.path");
         dirname = dirname == null ? "./" : dirname;
         
-        m_propsconfig.setProperty("db.driverlib", new File(new File(dirname), "lib/derby.jar").getAbsolutePath());
-        m_propsconfig.setProperty("db.driver", "org.apache.derby.jdbc.EmbeddedDriver");
-        m_propsconfig.setProperty("db.URL", "jdbc:derby:" + new File(new File(System.getProperty("user.home")), AppLocal.APP_ID + "-database").getAbsolutePath() + ";create=true");
-        m_propsconfig.setProperty("db.user", "");
+//        jtxtDbDriverLib.setText(new File(new File(dirname), "lib/mysql-connector-java-5.1.26-bin.jar").getAbsolutePath());
+//            jtxtDbDriver.setText("com.mysql.jdbc.Driver");
+//            jtxtDbURL.setText("jdbc:mysql://localhost:3306/onlynepos");
+        
+        
+//        m_propsconfig.setProperty("db.driverlib", new File(new File(dirname), "lib/derby.jar").getAbsolutePath());
+//        m_propsconfig.setProperty("db.driver", "org.apache.derby.jdbc.EmbeddedDriver");
+//        m_propsconfig.setProperty("db.URL", "jdbc:derby:" + new File(new File(System.getProperty("user.home")), AppLocal.APP_ID + "-database").getAbsolutePath() + ";create=true");
+        
+        m_propsconfig.setProperty("db.driverlib", new File(new File(dirname), "lib/mysql-connector-java-5.1.26-bin.jar").getAbsolutePath());
+        m_propsconfig.setProperty("db.driver", "com.mysql.jdbc.Driver");
+        m_propsconfig.setProperty("db.URL", "jdbc:mysql://localhost:3306/onlynepos");
+        
+        m_propsconfig.setProperty("db.user", "root");
         m_propsconfig.setProperty("db.password", "");
 
 //        m_propsconfig.setProperty("db.driverlib", new File(new File(dirname), "lib/hsqldb.jar").getAbsolutePath());
