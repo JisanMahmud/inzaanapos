@@ -18,7 +18,7 @@
 //    along with uniCenta oPOS.  If not, see <http://www.gnu.org/licenses/>.
 // *************************************************************************
 
-payment.addButton("1000_rupee_note", 1000.0);
+payment.addButton("2000_rupee_note", 2000.0);
 payment.addButton("500_rupee_note", 500.0);
 payment.addButton("100_rupee_note", 100.0);
 payment.addButton("50_rupee_note", 50.0);

@@ -292,7 +292,7 @@ public class JRootApp extends JPanel implements AppView {
         String newText = m_props.getProperty("start.text");
         if (newText != null) {
             if (newText.equals("")) {
-                jLabel1.setText("<html><center>OnlyNe oPOS - The Most Advanced Point of Sale<br>"
+                jLabel1.setText("<html><center>Onlyne oPOS - The Most Advanced Point of Sale<br>"
                         + "Copyright \u00A9 Onlyne <br>"
                         + "http://www.inzaana.com/<br>"
                         + "</center></html>");

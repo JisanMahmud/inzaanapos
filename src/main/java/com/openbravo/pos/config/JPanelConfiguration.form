@@ -207,8 +207,8 @@
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-              <JTabbedPaneConstraints tabName="Inzaana">
-                <Property name="tabTitle" type="java.lang.String" value="Inzaana"/>
+              <JTabbedPaneConstraints tabName="Onlyne">
+                <Property name="tabTitle" type="java.lang.String" value="Onlyne"/>
               </JTabbedPaneConstraints>
             </Constraint>
           </Constraints>

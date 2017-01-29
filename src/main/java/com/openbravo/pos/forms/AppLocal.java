@@ -30,7 +30,7 @@ public class AppLocal {
     /**
      *
      */
-    public static final String APP_NAME = "OnlyNe oPOS";
+    public static final String APP_NAME = "Onlyne oPOS";
 
     /**
      *

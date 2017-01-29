@@ -18,6 +18,7 @@
 //    along with uniCenta oPOS.  If not, see <http://www.gnu.org/licenses/>.
 package com.openbravo.pos.payment;
 
+import com.inzaana.pos.client.CustomerNotifier;
 import com.openbravo.format.Formats;
 import com.openbravo.pos.customers.CustomerInfoExt;
 import com.openbravo.pos.forms.AppLocal;
@@ -969,6 +970,15 @@ public abstract class JPaymentSelect extends javax.swing.JDialog
                 if (returnPayment != null) {
                     m_aPaymentInfo.add(returnPayment);
                     accepted = true;
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            CustomerNotifier customerNotifier = new CustomerNotifier(customerext, returnPayment);
+                            customerNotifier.notifyPayment(true, true);
+                        }
+                    });
+                    thread.start();
+                    
                     dispose();
                 }
             }

@@ -265,7 +265,7 @@ public class JPanelConfiguration extends JPanel implements JPanelView {
         jPanelInzaana.setMinimumSize(new java.awt.Dimension(107, 248));
         jPanelInzaana.setPreferredSize(new java.awt.Dimension(730, 450));
         jPanelInzaana.setLayout(new javax.swing.BoxLayout(jPanelInzaana, javax.swing.BoxLayout.LINE_AXIS));
-        jTabbedPane1.addTab("Inzaana", jPanelInzaana);
+        jTabbedPane1.addTab("Onlyne", jPanelInzaana);
 
         jbtnRestore.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         jbtnRestore.setText(AppLocal.getIntString("Button.Factory")); // NOI18N
