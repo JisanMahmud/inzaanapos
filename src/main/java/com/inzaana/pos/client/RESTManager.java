@@ -56,8 +56,8 @@ public class RESTManager {
 
         client = ClientBuilder.newClient(config);
         client.register(new LoggingFilter());
-        //client.register(new Authenticator(userId, userPassword));
-        client.register(new Authenticator("Mahmud", "123"));
+        client.register(new Authenticator(userId, userPassword));
+        //client.register(new Authenticator("Mahmud", "123"));
     }
     
     public void setUrl(String url)

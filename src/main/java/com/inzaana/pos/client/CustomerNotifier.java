@@ -11,6 +11,7 @@ import com.openbravo.pos.customers.CustomerInfoExt;
 import com.openbravo.pos.forms.InzaanaSplash;
 import com.openbravo.pos.payment.PaymentInfo;
 import java.util.prefs.Preferences;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -44,26 +45,27 @@ public class CustomerNotifier {
         content.setTotalPaid(paymentInfo.getTotal());
         content.setTotalPrice(paymentInfo.getPaid());
         
-        String userName = customerInfo.getFirstname() + " " + customerInfo.getLastname();
-        if (userName.isEmpty())
-        {
-            userName = customerInfo.getName();
-        }
-        content.setUserName(userName);
+        // Set Customer Name
+        String customerName = (customerInfo.getFirstname() != null) ? (customerInfo.getFirstname() + " ") : "";
+        customerName += (customerInfo.getLastname() != null) ? customerInfo.getLastname() : "";
+        customerName += (customerName.isEmpty() && customerInfo.getName() != null) ? customerInfo.getName() : "";
+        content.setUserName(customerName);
         
-        String userAddress = customerInfo.getAddress();
-        if (userAddress.isEmpty())
-        {
-            userAddress = customerInfo.getAddress2();
-        }
-        userAddress += ", " + customerInfo.getCity() + ", " + customerInfo.getCountry();
-        content.setUserAddress(userAddress);
-        content.setUserEmail(customerInfo.getEmail());
-        content.setUserPhoneNumber(customerInfo.getPhone());
-        if (content.getUserPhoneNumber().isEmpty())
-        {
-            content.setUserPhoneNumber(customerInfo.getPhone2());
-        }
+        // Set Customer Address
+        String customerAddress = (customerInfo.getAddress() != null) ? customerInfo.getAddress() : "";
+        customerAddress += (customerAddress.isEmpty() && customerInfo.getAddress2() != null) ? customerInfo.getAddress2() : "";
+        customerAddress += (customerInfo.getCity() != null) ? (", " + customerInfo.getCity()) : "";
+        customerAddress += (customerInfo.getCountry() != null) ? (", " + customerInfo.getCountry()) : "";
+        content.setUserAddress(customerAddress);
+        
+        // Set Customer Email
+        String customerEmail = (customerInfo.getEmail() != null) ? customerInfo.getEmail() : "";
+        content.setUserEmail(customerEmail);
+        
+        // Set Customer Phone
+        String customerPhoneNumber = (customerInfo.getPhone() != null) ? customerInfo.getPhone() : "";
+        customerPhoneNumber += (customerPhoneNumber.isEmpty() && customerInfo.getPhone2() != null) ? customerInfo.getPhone2() : "";
+        content.setUserPhoneNumber(customerPhoneNumber);
     }
     
     public boolean notifyPayment(boolean viaEmail, boolean viaSMS)
@@ -93,7 +95,7 @@ public class CustomerNotifier {
         String emailUrl = baseUrl + "/util/email";
         
         RESTManager restManager = new RESTManager();
-        restManager.setUrl("http://localhost:8080/pos/util/email");
+        restManager.setUrl(emailUrl);
         ResponseMessage response = restManager.put(content);
         if (response.getStatusCode() != 200)
         {
@@ -114,7 +116,7 @@ public class CustomerNotifier {
         String smsUrl = baseUrl + "/util/sms";
         
         RESTManager restManager = new RESTManager();
-        restManager.setUrl("http://localhost:8080/pos/util/sms");
+        restManager.setUrl(smsUrl);
         ResponseMessage response = restManager.put(content);
         if (response.getStatusCode() != 200)
         {
